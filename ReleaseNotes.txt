@@ -1,0 +1,33 @@
+Release Notes:
+v0.5.0 - 10/08/2022 Original live version on TII site
+v0.5.1 - 13/02/2023 Unreleased version with fix to fileInput2 func
+v0.5.2 - 09/03/2023 User Guide PDF added
+v0.6.0 - 25/05/2023 removal of seq_along() from rhandsontables, changes$changes instead. add button for additional rows
+v0.6.1 - 01/06/2023 bug fixes affecting removal of rows in rhandsontables and loading of data into some tables
+	 Export all tables functionality fixed. Formatted some tables to improve visual appearance.
+v0.6.2 - 30/06/2023 Greenways added. Superficial changes to summary.
+v0.6.3 - 06/07/2023 Update EFs supplied by sustainability team.
+v0.6.4 - 11/07/2023 Update to limit number of selectable options to 8. 
+	 Fix to summary tab to ensure Construction Waste emissions are captured in graphs
+v0.6.5 - 13/07/2023 fix to NumRoadOptions etc. not updating with old .sav files
+v0.6.6 - 18/07/2023 Final update to EFs removing crude oil as a fuel
+v0.6.9 - 23/08/2023 Additional Logging. This version is only for testing data sharing issue
+v0.6.10 - 25/08/2023 active session check in mod servers. This version is only for testing data sharing issue
+v0.6.11 - 25/08/2023 As 0.6.10 but with file.remove, sys.sleep and version print in load function
+v0.6.12 - 29/08/2023 As 0.6.10 but loading from temp file in modules
+v0.6.13 - 30/08/2023 As 0.6.10 but module UIs now in global and source() in app.R now in app.r server fun
+v0.6.15 - 07/09/2023 As 0.6.10 but removed all double assignation in app.r
+v0.6.18 - 07/09/2023 As 0.6.10 but kept double assignation for EFs only, change appR_returned to appR_returned
+v0.6.19 - 15/09/2023 As 0.6.18 final polished version live to TII
+v0.7.00 - 29/09/2023 Additional construction activities table and edits to all tables to stop tool crashing when cells are deleted
+v0.7.02 - 25/10/2023 as above, introduced save version too for patch associated with changes to cons waste EF
+v0.7.03 - 26/10/2023 as above, cross_join introduced in global.r instead of left_join(character())
+v0.7.04 - 13/03/2024 Updated EFs library
+v0.7.05 - 30/04/2024 Fix to dataframe/datatable issue in emb carbon module (line 475ish?). update just above that to make sure manual EFs in the save file are pulled in. Error catch to spot duplicates in manual EFs
+v0.7.06 - 22/05/2024 Updated EFs library, minor bug fix to warn users to ensure date fields are completed to avoid saving errors
+v0.7.07 - 08/08/2024 Update to stop data sharing on manual EFs
+v0.7.08 - 08/08/2024 Further to last entry aditional tidng of EFs$
+v0.7.09 - 28/11/2024 Updates to EFs library and text in UI as per EG email 22/11/2024
+v0.7.10 - 31/01/2025 Change to user guide URL
+v0.8.0  - 21/05/2025 Comprehensive update of embodied carbon emission factors to ICE database version 4.0
+v0.9.0  - 26/09/2025 Major updates to tool data entry functionality, and stability fixes. Includes table template download/upload functionality, table row data entry 	  via popup boxes, ability to add custom maintenance emissions to embodied carbon section.

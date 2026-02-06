@@ -1,0 +1,593 @@
+##### Use submodule ##############################################################################################################
+
+# Last modified by Andy Brown (12/01/2022)
+# - AB (11/01/2022):  Changed units from kg to tonnes for all outputs, kgConversion object used to do this (search global.R). N.B still as kg/unit for emissions inventory
+
+##################################################################################################################################
+
+useremis_ui <- function(id,tabName){
+  ns <- NS(id)
+  
+  # Switch selection depending on Road or Rail Option
+  if(stringr::str_detect(id, pattern = "ro[0-9]{1,2}$")){
+    #use_stage_icon <- use_road_icon
+    roadorrail <- "Road"
+  } else if(stringr::str_detect(id, pattern = "ra[0-9]{1,2}$")){
+    #use_stage_icon <- use_rail_icon
+    roadorrail <- "Rail"
+  } else if(stringr::str_detect(id, pattern = "gw[0-9]{1,2}$")){
+    #use_stage_icon <- use_road_icon
+    roadorrail <- "Greenway"
+  }
+  
+  tabItem(
+    tabName = tabName,
+    box(width = 12,
+        
+        fluidRow(
+          column(width = 7,
+                 h6(HTML("<br>")),
+                 h3(tagList(HTML("&nbsp;"), user_emis_road_icon, HTML("&nbsp;"), textOutput(ns("some_title"), inline = T)))
+          ),
+          column(width = 5, align = "right",
+                 h3(tagList(HTML("&nbsp;"), span(img(src="TIICarbonLogo.jpg", width = 220)), HTML("&nbsp;"))),
+                 h6(HTML("<br>")),
+                 h4(tagList(eflibrary_icon, paste0("Total ", roadorrail," User Emissions (tCO2e):  "), textOutput(outputId = ns("sum_useremis_tCO2"), inline = T), 
+                            HTML("&nbsp;"), HTML("&nbsp;")))
+          )
+        ),
+        
+        fluidRow(column(width = 12,
+                        box(width = 12,
+                            actionButton(inputId = ns("button"), label = "Toggle Guidance Notes", style=toggle_guid_btn_style),
+                            hidden(
+                              div(id = ns("guid_notes"),
+                                  p(HTML(paste0("<br> </br>The <b> Road User Emissions</b> page calculates emissions associated with the use of the road by the users.<br><br>
+                          Use the Edit button to modify the row displayed, or use the download/upload template buttons below the table to import data from Excel. 
+                          The data input tables require:<br>
+                            <ul><li>Input of use data direct from the REM model for project lifetime</li></ul><br>
+                          
+                          Carbon savings opportunities (both proposed and implemented) should be entered in the tables provided for each activity detailed, as applicable.")))
+                              ))))),
+        
+        tags$style(".nav-tabs {background: #f4f4f4;}"),
+        
+        tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "vehicleuse",
+               
+               
+               tabPanel(title = tagList("Vehicle Use", icon("arrow-circle-right")), value = "vehicleuse",
+                        fluidRow(
+                          column(width = 12,
+                                 tags$div(title="",#"This is Annual Emissions multiplied by Scheme Design Life",
+                                          h4("Vehicle Use Emissions (tCO2e):  ", textOutput(outputId = ns("sum_vehu_tCO2"), inline = T), HTML("<sup>&#x2610;<sup/>"))
+                                 ),
+                                 #h4(HTML("<br><br>")),
+                                 #h4("Scheme design life (years):  ", textOutput(outputId = ns("lifeTime"), inline = T)),
+                                 # rHandsontableOutput(ns("vehuTbl")),
+                                 # tags$style(type="text/css", paste0("#",ns("vehuTbl"), rhandsontable_headstyle))
+                                 column(6,offset = 6,
+                                        HTML('<div class="btn-group" role="group" aria-label="Basic example" style = "padding:10px">'),
+                                        ### tags$head() This is to change the color of "Add a new row" button
+                                        # tags$head(tags$style(".butt2{background-color:#231651;} .butt2{color: #e6ebef;}")),
+                                        # div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("oeu_Add_row_head"),label = "Add", class="butt2") ),
+                                        tags$head(tags$style(".butt4{background-color:#4d1566;} .butt4{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("vehu_mod_row_head"),label = "Edit", class="butt4") ),
+                                        # tags$head(tags$style(".butt3{background-color:#590b25;} .butt3{color: #e6ebef;}")),
+                                        # div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("oeu_Del_row_head"),label = "Delete", class="butt3") ),
+                                        ### Optional: a html button
+                                        # HTML('<input type="submit" name="Add_row_head" value="Add">'),
+                                        HTML('</div>') ),
+                                 
+                                 column(12,
+                                        DT::DTOutput(ns("vehuTbl"))
+                                 ),
+                                 tags$head(tags$style(".butt5{background-color:#231651;} .butt5{color: #e6ebef;}")),
+                                 div(style="display:inline-block;width:30%;text-align: center;",downloadButton(outputId = ns("vehu_Template_download"),label = "Download Template", class="butt5") ),
+                                 tags$head(tags$style(".fileinput_2 {width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1;}")),
+                                 tags$li(class = "dropdown", style="display:inline-block;width:30%;text-align: center;",
+                                         fileInput2(inputId = ns("vehu_Template_upload"), label = "Upload from Template", labelIcon = "file-upload",
+                                                    accept = ".xlsx", multiple = F, width = "100px", progress = F))
+                          )
+                        )
+               ),
+               
+               tabPanel(title = tagList("Carbon Saving Opportunities", icon("check-circle")), value = "csavo",
+                        fluidRow(
+                          column(width = 12,
+                                 h4(strong("Carbon Savings Identified but not Implemented")),
+                                 # rHandsontableOutput(ns("csavoNoImplTbl")),
+                                 # tags$style(type="text/css", paste0("#",ns("csavoNoImplTbl"), rhandsontable_headstyle))
+                                 column(6,offset = 6,
+                                        HTML('<div class="btn-group" role="group" aria-label="Basic example" style = "padding:10px">'),
+                                        ### tags$head() This is to change the color of "Add a new row" button
+                                        tags$head(tags$style(".butt2{background-color:#231651;} .butt2{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("csavoN_Add_row_head"),label = "Add", class="butt2") ),
+                                        tags$head(tags$style(".butt4{background-color:#4d1566;} .butt4{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("csavoN_mod_row_head"),label = "Edit", class="butt4") ),
+                                        tags$head(tags$style(".butt3{background-color:#590b25;} .butt3{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("csavoN_Del_row_head"),label = "Delete", class="butt3") ),
+                                        ### Optional: a html button
+                                        # HTML('<input type="submit" name="Add_row_head" value="Add">'),
+                                        HTML('</div>') ),
+                                 column(12,
+                                        DT::DTOutput(ns("csavoNoImplTbl"))
+                                 )
+                          )
+                        ),
+                        fluidRow(
+                          column(width = 12,
+                                 h4(strong("Carbon Savings Identified and Implemented")),
+                                 # rHandsontableOutput(ns("csavoImplTbl")),
+                                 # tags$style(type="text/css", paste0("#",ns("csavoImplTbl"), rhandsontable_headstyle))
+                                 column(6,offset = 6,
+                                        HTML('<div class="btn-group" role="group" aria-label="Basic example" style = "padding:10px">'),
+                                        ### tags$head() This is to change the color of "Add a new row" button
+                                        tags$head(tags$style(".butt2{background-color:#231651;} .butt2{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("csavoI_Add_row_head"),label = "Add", class="butt2") ),
+                                        tags$head(tags$style(".butt4{background-color:#4d1566;} .butt4{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("csavoI_mod_row_head"),label = "Edit", class="butt4") ),
+                                        tags$head(tags$style(".butt3{background-color:#590b25;} .butt3{color: #e6ebef;}")),
+                                        div(style="display:inline-block;width:30%;text-align: center;",actionButton(inputId = ns("csavoI_Del_row_head"),label = "Delete", class="butt3") ),
+                                        ### Optional: a html button
+                                        # HTML('<input type="submit" name="Add_row_head" value="Add">'),
+                                        HTML('</div>') ),
+                                 column(12,
+                                        DT::DTOutput(ns("csavoImplTbl"))
+                                 )
+                          )
+                        )
+               )
+        )
+    )
+  )
+}
+
+useremis_server <- function(id, option_number, thetitle, theoutput, appR_returned, projectdetails_values){
+  
+
+  
+  DF_vehuse = data.table(`REM Outputs: Do Minimum Scenario (tCO2e)` = c(0.0),
+                         `REM Outputs: Do Something Scenario (tCO2e)` = 0.0,
+                         `Difference DS-DM Scenarios (tCO2e)` = 0.0,
+                         `Comments` = "",
+                         stringsAsFactors = F, check.names = FALSE)
+  
+  
+  DF_csavoNoImpl = data.table(`Description of options and how they will lead to carbon savings` = c("","","","",""), 
+                              `Rationale for why the option has not been taken forward for implementation` = c("","","","",""), stringsAsFactors = F, check.names = FALSE)
+  
+  DF_csavoImpl = data.table(`Description of options and how they will lead to carbon savings` = c("","","","",""), 
+                            `Rationale for implementation` = c("","","","",""), stringsAsFactors = F, check.names = FALSE)
+  
+  
+  #oeuvalues <- reactiveValues(data=DF_energyuse)
+  #owuvalues <- reactiveValues(data=DF_wateruse)
+  #operwastevalues <- reactiveValues(data=DF_operwaste)
+  
+  #mpfuvalues <- reactiveValues(data=DF_mpfueluse)
+  
+  vehuvalues <- reactiveValues(data=DF_vehuse)
+  
+  csavoNoImplvalues <- reactiveValues(data=DF_csavoNoImpl)
+  csavoImplvalues <- reactiveValues(data=DF_csavoImpl)
+  
+  
+  # sum_oeu_tCO2 <- reactiveValues(data=0.0) # sum(DF_energyuse$`Emissions tCO2e`))
+  # sum_owu_tCO2 <- reactiveValues(data=0.0) # sum(DF_wateruse$`Emissions tCO2e`))
+  # sum_owaste_tCO2 <- reactiveValues(data=0.0)
+  # sum_owaste_trans_tCO2 <- reactiveValues(data=0.0)
+  # sum_mpfu_tCO2 <- reactiveValues(data=0.0) # sum(DF_mpfueluse$`Emissions tCO2e`))
+  sum_vehu_tCO2 <- reactiveValues(data=0.0) # sum(DF_vehuse$`Difference DS-DN Scenarios (tCO2e)`))
+  
+  sum_useremis_tCO2 <- reactiveValues(data=0.0)
+  
+  
+  DF_returned <- data.table(Option = rep(option_number, 2),
+                            Stage = rep("User Emissions", 2),
+                            Measure = c("Vehicle Use","Total"),
+                            Value = rep(0.0, 2),
+                            stringsAsFactors = F, check.names = FALSE)
+  
+  useremis_returned <- reactiveValues(data=DF_returned,
+                                 carbsavenotimp=data.table(Option = stringr::str_sub(id, start = -1), 
+                                                           Stage = c("User Emissions"),
+                                                           Description = c(""), Rationale = c("")),
+                                 carbsaveimp=data.table(Option = stringr::str_sub(id, start = -1),
+                                                        Stage = c("User Emissions"),
+                                                        Description = c(""), Rationale = c("")),
+                                 vehuTblResave = DF_vehuse,
+                                 csavoNoImplTblResave = DF_csavoNoImpl,
+                                 csavoImplTblResave = DF_csavoImpl)
+  
+  
+  moduleServer(id,
+               function(input, output, session){
+                 
+                 ns <- session$ns
+                 
+                 # Sum of total carbon emissions for each activity type
+                 # output$sum_oeu_tCO2<- renderText({formatC(round(sum_oeu_tCO2$data, digits = Emissions_DPlaces_tabs), format="f", digits = Emissions_DPlaces_tabs, big.mark=',')})
+                 # output$sum_owu_tCO2<- renderText({formatC(round(sum_owu_tCO2$data, digits = Emissions_DPlaces_tabs), format="f", digits = Emissions_DPlaces_tabs, big.mark=',')})
+                 # output$sum_owaste_tCO2 <- renderText({formatC(round(sum(sum_owaste_tCO2$data, sum_owaste_trans_tCO2$data), digits = Emissions_DPlaces_tabs), format="f", digits = Emissions_DPlaces_tabs, big.mark=',')})
+                 # 																	  
+                 
+                 # output$sum_mpfu_tCO2<- renderText({formatC(round(sum_mpfu_tCO2$data, digits = Emissions_DPlaces_tabs), format="f", digits = Emissions_DPlaces_tabs, big.mark=',')})
+                 
+                 output$sum_vehu_tCO2<- renderText({formatC(round(sum_vehu_tCO2$data, digits = Emissions_DPlaces_tabs), format="f", digits = Emissions_DPlaces_tabs, big.mark=',')})
+                 
+                 output$sum_useremis_tCO2<- renderText({formatC(round(sum_useremis_tCO2$data, digits = Emissions_DPlaces_menus), format="f", digits = Emissions_DPlaces_menus, big.mark=',')})
+
+                 output$some_title <- renderText({thetitle})
+
+                 output$lifeTime <- reactive({projectdetails_values$lifeTime})
+                 # output$lifeTime2 <- reactive({projectdetails_values$lifeTime})
+                 # output$lifeTime3 <- reactive({projectdetails_values$lifeTime})
+                 # output$lifeTime4 <- reactive({projectdetails_values$lifeTime})
+                 # output$lifeTime5 <- reactive({projectdetails_values$lifeTime})
+                 
+                 
+                 # Observe Event on load button click (via global reactive expression) - clears rhandsontable once on press
+                 observeEvent(appR_returned$loadReact, {
+                   print("ObserveEvent   USER EMISSIONS   appR_returned$loadReact")
+                   # oeuvalues$data = DF_energyuse
+                   # owuvalues$data = DF_wateruse
+                   # mpfuvalues$data = DF_mpfueluse
+                   vehuvalues$data = DF_vehuse
+                   csavoNoImplvalues$data = DF_csavoNoImpl
+                   csavoImplvalues$data = DF_csavoImpl
+                   
+                   # sum_oeu_tCO2$data = 0.0
+                   # sum_owu_tCO2$data = 0.0
+                   # sum_owaste_tCO2$data = 0.0
+                   # sum_owaste_trans_tCO2$data = 0.0
+                   # sum_mpfu_tCO2$data = 0.0
+                   sum_vehu_tCO2$data = 0.0
+                   sum_useremis_tCO2$data = 0.0
+                   
+                   useremis_returned$data$Value = c(0.0,0.0)
+                   
+                   useremis_returned$carbsaveimp$Description = c("")
+                   useremis_returned$carbsaveimp$Rationale = c("")
+                   useremis_returned$carbsavenotimp$Description = c("")
+                   useremis_returned$carbsavenotimp$Rationale = c("")
+                   
+                   
+                   if (is.null(appR_returned$data[[paste0(id, "_vehuTbl")]])){
+                     print("LOAD DATA IS NULL")
+                   } else {
+                  
+                   
+                   tmpData <- appR_returned$data[[paste0(id, "_vehuTbl")]]
+                   colnames(tmpData) <- colnames(DF_vehuse)
+                   tmpData$`Comments` <- as.character(tmpData$`Comments`)
+                   vehuvalues$data <- tmpData
+                   useremis_returned$vehuTblResave = tmpData
+                   
+                   sum_vehu_tCO2$data = sum(na.omit(tmpData$`Difference DS-DM Scenarios (tCO2e)`))# * projectdetails_values$lifeTime
+                   
+                   
+                   
+                   sum_useremis_tCO2$data = sum(sum_vehu_tCO2$data)
+                   
+                   useremis_returned$data$Value = c(sum_vehu_tCO2$data, sum_useremis_tCO2$data)
+                   
+                   
+                   
+                   tmpData <- appR_returned$data[[paste0(id,"_csavoNoImplTbl")]]
+                   colnames(tmpData) <- colnames(DF_csavoNoImpl)
+                   tmpData <- transform(tmpData, `Description of options and how they will lead to carbon savings` = as.character(`Description of options and how they will lead to carbon savings`),
+                                        `Rationale for why the option has not been taken forward for implementation` = as.character(`Rationale for why the option has not been taken forward for implementation`))
+                   colnames(tmpData) <- colnames(DF_csavoNoImpl)
+                   useremis_returned$csavoNoImplTblResave <- tmpData
+                   csavoNoImplvalues$data <- tmpData
+
+                   tmpdat <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(tmpData)),
+                                        Stage = rep("User Emissions", nrow(tmpData)))
+                   tmpdat[, `:=` (Description = tmpData$`Description of options and how they will lead to carbon savings`,
+                                  Rationale = tmpData$`Rationale for why the option has not been taken forward for implementation`)]
+                   useremis_returned$carbsavenotimp = tmpdat
+
+
+
+                   tmpData <- appR_returned$data[[paste0(id,"_csavoImplTbl")]]
+                   colnames(tmpData) <- colnames(DF_csavoImpl)
+                   tmpData <- transform(tmpData, `Description of options and how they will lead to carbon savings` = as.character(`Description of options and how they will lead to carbon savings`),
+                                        `Rationale for implementation` = as.character(`Rationale for implementation`))
+                   colnames(tmpData) <- colnames(DF_csavoImpl)
+                   useremis_returned$csavoImplTblResave <- tmpData
+                   csavoImplvalues$data <- tmpData
+
+                   tmpdat <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(tmpData)),
+                                        Stage = rep("User Emissions", nrow(tmpData)))
+                   tmpdat[, `:=` (Description = tmpData$`Description of options and how they will lead to carbon savings`,
+                                  Rationale = tmpData$`Rationale for implementation`)]
+                   useremis_returned$carbsaveimp = tmpdat
+                   
+                   }
+                   
+                 })
+                 
+                 
+                 output$vehuTbl <- DT::renderDT({
+                   DT = vehuvalues$data
+                   datatable(DT, options = list(dom="t"),
+                             escape=F, rownames= FALSE)
+                 })
+                 
+                 observeEvent(input$vehu_mod_row_head, {
+                   ### This is the pop up board for input a new row
+                   showModal(modalDialog(
+                     title = "Add a new row",
+                     numericInput(ns("vehu_add_col1"), label = "REM Outputs: Do Minimum Scenario (tCO2e)", value = vehuvalues$data[input$vehuTbl_rows_selected,1]),
+                     numericInput(ns("vehu_add_col2"), label = "REM Outputs: Do Something Scenario (tCO2e)", value = vehuvalues$data[input$vehuTbl_rows_selected,2]),
+                     #numericInput(ns("vehu_add_col3"), label = "Difference DS-DM Scenarios (tCO2e)", value = 0),
+                     textInput(ns("vehu_add_col3"), label = "Comments", value = vehuvalues$data[input$vehuTbl_rows_selected,4]),
+                     actionButton(ns("vehu_add_row_go"), "Add item"),
+                     easyClose = TRUE, footer = NULL ))
+                 })
+                 
+                 observeEvent(input$vehu_add_row_go, {
+                   
+                   new_row = data.frame(input$vehu_add_col1,
+                                        input$vehu_add_col2,
+                                        "Difference DS-DM Scenarios (tCO2e)" = 0,
+                                        input$vehu_add_col3) %>%
+                     dplyr::mutate(`Difference.DS.DM.Scenarios..tCO2e.` = input.vehu_add_col2 - input.vehu_add_col1)
+                   
+                   vehuvalues$data[1,] <- new_row
+                   sum_vehu_tCO2$data = sum(na.omit(vehuvalues$data$`Difference DS-DM Scenarios (tCO2e)`))# * projectdetails_values$lifeTime # get total carbon emissions
+                   
+                   # update total sum of carbon emissions when any table cell changes value
+                   sum_useremis_tCO2$data = sum(sum_vehu_tCO2$data)
+                   useremis_returned$data$Value = c(sum_vehu_tCO2$data, sum_useremis_tCO2$data)
+                   useremis_returned$vehuTblResave = vehuvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 
+                 output$vehu_Template_download <- downloadHandler(
+                   filename = function(){"RoadRail_UserEmissions.xlsx"},
+                   content =function(file){file.copy(from = "Templates/RoadRail_UserEmissions.xlsx",to = file)}
+                 )
+                 
+                 observeEvent(input$vehu_Template_upload$name, {
+                   
+                   templateIn <- readxl::read_xlsx(input$vehu_Template_upload$datapath)
+                   
+                   if (identical(names(templateIn)[1:3], names(vehuvalues$data)[1:3])){
+                     
+                     templateIn_data <- templateIn %>% # overwrite
+                       dplyr::mutate(`Difference DS-DM Scenarios (tCO2e)` = 
+                                       `REM Outputs: Do Something Scenario (tCO2e)` - `REM Outputs: Do Minimum Scenario (tCO2e)`)
+                     
+                     vehuvalues$data <- templateIn_data
+                     
+                     sum_vehu_tCO2$data = sum(na.omit(vehuvalues$data$`Difference DS-DM Scenarios (tCO2e)`))
+                     sum_useremis_tCO2$data = sum(sum_vehu_tCO2$data)
+                     useremis_returned$data$Value = c(sum_vehu_tCO2$data, sum_useremis_tCO2$data)
+                     useremis_returned$vehuTblResave = vehuvalues$data
+                     
+                   } else {
+                     showModal(
+                       modalDialog(
+                         title = "Warning",
+                         paste("Template upload - columns do not match. Please try another template."),easyClose = FALSE
+                       )
+                     )
+                   }
+                 })
+                 
+                 
+                 # rHandsontable for Carbon saving options (non-implementation)
+                 output$csavoNoImplTbl <- renderRHandsontable({
+                   rhandsontable(csavoNoImplvalues$data, rowHeaders = NULL, height = rhandsontable_defaultheight, stretchH = "all")
+                 })
+                 
+                 # rHandsontable for Carbon saving options (Implementation)
+                 output$csavoImplTbl <- renderRHandsontable({
+                   rhandsontable(csavoImplvalues$data, rowHeaders = NULL, height = rhandsontable_defaultheight, stretchH = "all")
+                 })
+                 
+                 # Carbon saving options (non-implementation) ----
+                 output$csavoNoImplTbl <- DT::renderDT({
+                   DT = csavoNoImplvalues$data
+                   datatable(DT, #selection = 'single',
+                             escape=F, rownames= FALSE)
+                 })
+                 
+                 observeEvent(input$csavoN_Add_row_head, {
+                   showModal(modalDialog(
+                     title = "Add a new row",
+                     textInput(ns("csavoN_add_col1"), label = "Description of options and how they will lead to carbon savings"),
+                     textInput(ns("csavoN_add_col2"), label = "Rationale for why the option has not been taken forward for implementation"),
+                     actionButton(ns("csavoN_Add_row_go"), "Add item"),
+                     easyClose = TRUE, footer = NULL ))
+                 })
+                 
+                 observeEvent(input$csavoN_Add_row_go, {
+                   new_row = data.frame(input$csavoN_add_col1, input$csavoN_add_col2)
+                   csavoNoImplvalues$data <- data.table(rbind(csavoNoImplvalues$data, new_row, use.names = F))
+                   
+                   csavo_tmp <- data.table(csavoNoImplvalues$data); names(csavo_tmp) <- c("Description","Rationale")
+                   tmpdf <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(csavo_tmp)),
+                                       Stage = rep("User Emissions", nrow(csavo_tmp)))
+                   tmpdf[, `:=` (Description = csavo_tmp$Description, Rationale = csavo_tmp$Rationale)]
+                   useremis_returned$carbsavenotimp <- tmpdf
+                   useremis_returned$csavoNoImplTblResave = csavoNoImplvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 observeEvent(input$csavoN_Del_row_head,{
+                   showModal(
+                     if(length(input$csavoNoImplTbl_rows_selected)>=1 ){
+                       modalDialog(
+                         title = "Warning",
+                         paste("Are you sure you want to delete",length(input$csavoNoImplTbl_rows_selected),"rows?" ),
+                         footer = tagList(
+                           modalButton("Cancel"),
+                           actionButton(ns("csavoN_del_row_ok"), "Yes")
+                         ), easyClose = TRUE)
+                     }else{
+                       modalDialog(
+                         title = "Warning",
+                         paste("Please select row(s) that you want to delete!" ),easyClose = TRUE
+                       )
+                     }
+                   )
+                 })
+                 
+                 observeEvent(input$csavoN_del_row_ok, {
+                   csavoNoImplvalues$data = csavoNoImplvalues$data[-input$csavoNoImplTbl_rows_selected,]
+                   
+                   csavo_tmp <- data.table(csavoNoImplvalues$data); names(csavo_tmp) <- c("Description","Rationale")
+                   tmpdf <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(csavo_tmp)),
+                                       Stage = rep("User Emissions", nrow(csavo_tmp)))
+                   tmpdf[, `:=` (Description = csavo_tmp$Description, Rationale = csavo_tmp$Rationale)]
+                   useremis_returned$carbsavenotimp <- tmpdf
+                   useremis_returned$csavoNoImplTblResave = csavoNoImplvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 observeEvent(input$csavoN_mod_row_head,{
+                   showModal(
+                     if(length(input$csavoNoImplTbl_rows_selected)==1 ){
+                       modalDialog(
+                         title = "Modify Row",
+                         textInput(ns("csavoN_mod_col1"), label = "Description of options and how they will lead to carbon savings", value = csavoNoImplvalues$data[input$csavoNoImplTbl_rows_selected,1]),
+                         textInput(ns("csavoN_mod_col2"), label = "Rationale for why the option has not been taken forward for implementation", value = csavoNoImplvalues$data[input$csavoNoImplTbl_rows_selected,2]),
+                         hidden(numericInput(ns("csavoN_mod_rown"), value = input$csavoNoImplTbl_rows_selected, label = "row being edited")),
+                         actionButton(ns("csavoN_confirm_mod"),"Confirm"),
+                         easyClose = TRUE, footer = NULL )
+                     }else{
+                       modalDialog(
+                         title = "Warning",
+                         paste("Please select one row to edit" ),easyClose = TRUE
+                       )
+                     }
+                   )
+                 })
+                 
+                 observeEvent(input$csavoN_confirm_mod, {
+                   new_row = data.frame(input$csavoN_mod_col1, input$csavoN_mod_col2)
+                   csavoNoImplvalues$data[input$csavoN_mod_rown,] <- new_row
+                   
+                   csavo_tmp <- data.table(csavoNoImplvalues$data); names(csavo_tmp) <- c("Description","Rationale")
+                   tmpdf <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(csavo_tmp)),
+                                       Stage = rep("User Emissions", nrow(csavo_tmp)))
+                   tmpdf[, `:=` (Description = csavo_tmp$Description, Rationale = csavo_tmp$Rationale)]
+                   useremis_returned$carbsavenotimp <- tmpdf
+                   useremis_returned$csavoNoImplTblResave = csavoNoImplvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 
+                 
+                 # Carbon saving options (Implementation) ----
+                 output$csavoImplTbl <- DT::renderDT({
+                   DT = csavoImplvalues$data
+                   datatable(DT, #selection = 'single',
+                             escape=F, rownames= FALSE)
+                 })
+                 
+                 observeEvent(input$csavoI_Add_row_head, {
+                   showModal(modalDialog(
+                     title = "Add a new row",
+                     textInput(ns("csavoI_add_col1"), label = "Description of options and how they will lead to carbon savings"),
+                     textInput(ns("csavoI_add_col2"), label = "Rationale for implementation"),
+                     actionButton(ns("csavoI_Add_row_go"), "Add item"),
+                     easyClose = TRUE, footer = NULL ))
+                 })
+                 
+                 observeEvent(input$csavoI_Add_row_go, {
+                   new_row = data.frame(input$csavoI_add_col1, input$csavoI_add_col2)
+                   csavoImplvalues$data <- data.table(rbind(csavoImplvalues$data, new_row, use.names = F))
+                   
+                   csavo_tmp <- data.table(csavoImplvalues$data); names(csavo_tmp) <- c("Description","Rationale")
+                   tmpdf <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(csavo_tmp)),
+                                       Stage = rep("User Emissions", nrow(csavo_tmp)))
+                   tmpdf[, `:=` (Description = csavo_tmp$Description, Rationale = csavo_tmp$Rationale)]
+                   useremis_returned$carbsaveimp <- tmpdf
+                   useremis_returned$csavoImplTblResave = csavoImplvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 observeEvent(input$csavoI_Del_row_head,{
+                   showModal(
+                     if(length(input$csavoImplTbl_rows_selected)>=1 ){
+                       modalDialog(
+                         title = "Warning",
+                         paste("Are you sure you want to delete",length(input$csavoImplTbl_rows_selected),"rows?" ),
+                         footer = tagList(
+                           modalButton("Cancel"),
+                           actionButton(ns("csavoI_del_row_ok"), "Yes")
+                         ), easyClose = TRUE)
+                     }else{
+                       modalDialog(
+                         title = "Warning",
+                         paste("Please select row(s) that you want to delete!" ),easyClose = TRUE
+                       )
+                     }
+                   )
+                 })
+                 
+                 observeEvent(input$csavoI_del_row_ok, {
+                   csavoImplvalues$data = csavoImplvalues$data[-input$csavoImplTbl_rows_selected,]
+                   
+                   csavo_tmp <- data.table(csavoImplvalues$data); names(csavo_tmp) <- c("Description","Rationale")
+                   tmpdf <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(csavo_tmp)),
+                                       Stage = rep("User Emissions", nrow(csavo_tmp)))
+                   tmpdf[, `:=` (Description = csavo_tmp$Description, Rationale = csavo_tmp$Rationale)]
+                   useremis_returned$carbsaveimp <- tmpdf
+                   useremis_returned$csavoImplTblResave = csavoImplvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 observeEvent(input$csavoI_mod_row_head,{
+                   showModal(
+                     if(length(input$csavoImplTbl_rows_selected)==1 ){
+                       modalDialog(
+                         title = "Modify Row",
+                         textInput(ns("csavoI_mod_col1"), label = "Description of options and how they will lead to carbon savings", value = csavoImplvalues$data[input$csavoImplTbl_rows_selected,1]),
+                         textInput(ns("csavoI_mod_col2"), label = "Rationale for why the option has not been taken forward for implementation", value = csavoImplvalues$data[input$csavoImplTbl_rows_selected,2]),
+                         hidden(numericInput(ns("csavoI_mod_rown"), value = input$csavoImplTbl_rows_selected, label = "row being edited")),
+                         actionButton(ns("csavoI_confirm_mod"),"Confirm"),
+                         easyClose = TRUE, footer = NULL )
+                     }else{
+                       modalDialog(
+                         title = "Warning",
+                         paste("Please select one row to edit" ),easyClose = TRUE
+                       )
+                     }
+                   )
+                 })
+                 
+                 observeEvent(input$csavoI_confirm_mod, {
+                   new_row = data.frame(input$csavoI_mod_col1, input$csavoI_mod_col2)
+                   csavoImplvalues$data[input$csavoI_mod_rown,] <- new_row
+                   
+                   csavo_tmp <- data.table(csavoImplvalues$data); names(csavo_tmp) <- c("Description","Rationale")
+                   tmpdf <- data.table(Option = rep(stringr::str_sub(id, start = -1), nrow(csavo_tmp)),
+                                       Stage = rep("User Emissions", nrow(csavo_tmp)))
+                   tmpdf[, `:=` (Description = csavo_tmp$Description, Rationale = csavo_tmp$Rationale)]
+                   useremis_returned$carbsaveimp <- tmpdf
+                   useremis_returned$csavoImplTblResave = csavoImplvalues$data
+                   
+                   removeModal()
+                 })
+                 
+                 
+                 observeEvent(input$button, {
+                   shinyjs::toggle("guid_notes")
+                 })
+               }, session = getDefaultReactiveDomain()
+  )
+  
+  return(useremis_returned)
+  
+}
