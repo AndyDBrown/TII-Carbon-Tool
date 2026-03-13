@@ -56,11 +56,16 @@ ReleaseDate11 <- "September 2025"
 Issue11 <- "Major updates to tool data entry functionality."
 Change11 <- "Major updates to tool data entry functionality, and stability fixes. Includes table template download/upload functionality, table row data entry via popup boxes, ability to add custom maintenance emissions to embodied carbon section."
 
+ToolVersion12 <- "Version 0.9.1"
+ReleaseDate12 <- "March 2026"
+Issue12 <- "Units issue with a small number of Embodied Carbon EFs."
+Change12 <- "EF library Updated"
 
-changes <- tibble("Tool Version" = c(ToolVersion11, ToolVersion10, ToolVersion9, ToolVersion8, ToolVersion7, ToolVersion6, ToolVersion5, ToolVersion4, ToolVersion3, ToolVersion2, ToolVersion1),
-                  "Release Date" = c(ReleaseDate11, ReleaseDate10, ReleaseDate9, ReleaseDate8, ReleaseDate7, ReleaseDate6, ReleaseDate5, ReleaseDate4, ReleaseDate3, ReleaseDate2, ReleaseDate1),
-                  Issue = c(Issue11, Issue10, Issue9, Issue8, Issue7, Issue6, Issue5, Issue4, Issue3, Issue2, Issue1),
-                  `Description of changes` = c(Change11, Change10, Change9, Change8, Change7, Change6, Change5, Change4, Change3, Change2, Change1))
+
+changes <- tibble("Tool Version" = c(ToolVersion12, ToolVersion11, ToolVersion10, ToolVersion9, ToolVersion8, ToolVersion7, ToolVersion6, ToolVersion5, ToolVersion4, ToolVersion3, ToolVersion2, ToolVersion1),
+                  "Release Date" = c(ReleaseDate12, ReleaseDate11, ReleaseDate10, ReleaseDate9, ReleaseDate8, ReleaseDate7, ReleaseDate6, ReleaseDate5, ReleaseDate4, ReleaseDate3, ReleaseDate2, ReleaseDate1),
+                  Issue = c(Issue12, Issue11, Issue10, Issue9, Issue8, Issue7, Issue6, Issue5, Issue4, Issue3, Issue2, Issue1),
+                  `Description of changes` = c(Change12, Change11, Change10, Change9, Change8, Change7, Change6, Change5, Change4, Change3, Change2, Change1))
 
 
 ccontrol_ui <- function(id,tabName){
