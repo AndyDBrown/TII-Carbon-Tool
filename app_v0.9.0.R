@@ -53,7 +53,7 @@ source(file = "modules/eolife.R")
 source(file = "modules/ccontrol.R")
 
 ########## MAIN APP ##########
-ToolVersion <<- "0.9.0" # update this version for the emission factors update
+ToolVersion <<- "0.9.1" # update this version for the emission factors update
 SaveFileVersion <<- 2 # 1 ## save file v1 goes with tool version 0.7.2. Anything before that had no version embedded in the .sav file
                       ## We don't need to update this with every ToolVersion, just when alterations to the save/load logic are made, i.e. patches
 
