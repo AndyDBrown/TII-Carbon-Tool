@@ -245,8 +245,9 @@ jsTrimDrop <- HTML(readr::read_file("www/trimdrop.js"))
 ##### EMISSION FACTORS #####
 #efs <<- rio::import_list("emission_factors/Emission_Factors.xlsx", setclass = "data.table") # imports all EF data as a list
 #efs <<- rio::import_list("emission_factors/Emission_Factors_May2025.xlsx", setclass = "data.table") # imports all EF data as a list
-efs <<- rio::import_list("emission_factors/Emission_Factors_May2025_CompGroup.xlsx", setclass = "data.table") # imports all EF data as a list
-#efs_new <<- rio::import_list("emission_factors/Emission_Factors_Test.xlsx", setclass = "data.table") # imports all EF data as a list
+# efs <<- rio::import_list("emission_factors/Emission_Factors_May2025_CompGroup.xlsx", setclass = "data.table") # imports all EF data as a list
+efs <<- rio::import_list("emission_factors/Emission_Factors_13-MAR-2026.xlsx", setclass = "data.table") # imports all EF data as a list
+
 
 
 fuels <- efs$Fuel
