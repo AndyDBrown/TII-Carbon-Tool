@@ -460,7 +460,8 @@ ui <- dashboardPage(title = "TII Carbon Tool",
                                          menuItem(text = "Change Control", tabName = "CControl", icon = ccontrol_icon),
                                          
                                          hr(),
-                                         downloadButton(outputId = "downloadguide", label = "Download PDF Guide", icon = icon("file-download"))
+                                         # downloadButton(outputId = "downloadguide", label = "Download PDF Guide", icon = icon("file-download"))
+                                         tagList(a(HTML("&nbsp;&nbsp;Download PDF Guide"), href="https://www.tiipublications.ie/document/?id=3219", target="_blank"))
                                          
                              )
                              
@@ -683,16 +684,16 @@ server <- function(input, output, session){
   
 
   # Download button handler for PDF Guide -----
-  output$downloadguide <- downloadHandler(
-    filename = function() {
-      paste("TII-Carbon-Tool-Guide.pdf", sep="")
-    },
-    content = function(file){
-      GET("https://cdn.tii.ie/publications/GE-ENV-01106-02.pdf", write_disk(file))
-    }
-  )
+  # output$downloadguide <- downloadHandler(
+  #   filename = function() {
+  #     paste("TII-Carbon-Tool-Guide.pdf", sep="")
+  #   },
+  #   content = function(file){
+  #     GET("https://www.tiipublications.ie/document/?id=3219", write_disk(file))
+  #   }
+  # )
   
-   cat(file=stderr(), "***  output$downloadguide:",session$token, "**** \n")
+   # cat(file=stderr(), "***  output$downloadguide:",session$token, "**** \n")
 
   
   observeEvent(load_data_react_2(), {
