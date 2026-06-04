@@ -73,6 +73,12 @@ ui <- dashboardPage(title = "TII Carbon Tool",
                                    tags$style(HTML("#downloadinputs:hover {background-color: #AECC53;}"))
                                    ),
                            
+                           tags$li(class = "dropdown", downloadButton(outputId = "downloadExcelQA", label = "Export Excel QA Workbook",
+                                                                      icon = icon("file-download")),
+                                   tags$style(HTML("#downloadExcelQA {background-color: #333333; height: 34px;padding: 5px 14px 5px 14px;}")),
+                                   tags$style(HTML("#downloadExcelQA:hover {background-color: #AECC53;}"))
+                           ),
+                           
                            tags$li(class = "dropdown", HTML("&nbsp;"), HTML("&nbsp;")),
                            
                            tags$li(class = "dropdown", HTML("&nbsp;"), HTML("&nbsp;"), HTML("&nbsp;"), HTML("&nbsp;")),
@@ -559,28 +565,32 @@ server <- function(input, output, session){
     },
     content = function(filename){
       
-      #showModal(modalDialog("Downloading data", footer=NULL))
-      #on.exit(removeModal())
+      # #showModal(modalDialog("Downloading data", footer=NULL))
+      # #on.exit(removeModal())
+      # #browser()
+      # inputs <- NULL
+      # for (i in 1:nrow(collatedShinyInputs)){
+      #   collatedShinyInputs$Value[i] <- input[[collatedShinyInputs[i,1]]]
+      # }
+      # 
+      # ##### build save file with parameters and corresp. values
+      # inputs_data_frame <- collatedShinyInputs[-1]
+      # 
+      # ##### pull in data from rhandsontables
+      # for (i in 1:nrow(collatedTableLoadFiles)){
+      #   #assign(collatedTableLoadFiles[i,1],hot_to_r(input[[collatedTableLoadFiles[i,2]]]))
+      #   #assign(collatedTableLoadFiles[i,1], input[[collatedTableLoadFiles[i,2]]])
+      #   #if (is.null(get(collatedTableLoadFiles[i,1]))){
+      #     assign(collatedTableLoadFiles[i,1], options_serv[[collatedTableLoadFiles[i,1]]])
+      #   #}
+      # }
+      # 
+      # collatedTableLoadFiles[nrow(collatedTableLoadFiles)+1,] <- "inputs_data_frame"
+      # dfstoSave <- mget(unlist(collatedTableLoadFiles[1]))
       
-      inputs <- NULL
-      for (i in 1:nrow(collatedShinyInputs)){
-        collatedShinyInputs$Value[i] <- input[[collatedShinyInputs[i,1]]]
-      }
       
-      ##### build save file with parameters and corresp. values
-      inputs_data_frame <- collatedShinyInputs[-1]
+      dfstoSave <- return_dfstoSave()
       
-      ##### pull in data from rhandsontables
-      for (i in 1:nrow(collatedTableLoadFiles)){
-        #assign(collatedTableLoadFiles[i,1],hot_to_r(input[[collatedTableLoadFiles[i,2]]]))
-        #assign(collatedTableLoadFiles[i,1], input[[collatedTableLoadFiles[i,2]]])
-        #if (is.null(get(collatedTableLoadFiles[i,1]))){
-          assign(collatedTableLoadFiles[i,1], options_serv[[collatedTableLoadFiles[i,1]]])
-        #}
-      }
-      
-      collatedTableLoadFiles[nrow(collatedTableLoadFiles)+1,] <- "inputs_data_frame"
-      dfstoSave <- mget(unlist(collatedTableLoadFiles[1]))
       # add manual EF inputs to save file here:
       dfstoSave$efs_materialroad_userinput <- efs_materialroad_userinput$data
       dfstoSave$efs_materialrail_userinput <- efs_materialrail_userinput$data
@@ -602,6 +612,77 @@ server <- function(input, output, session){
     }
   )
   
+  
+  # Excel QA Tool download button handler -----
+  output$downloadExcelQA <- downloadHandler(
+    filename = function() {
+      #paste("TII-ExcelQA-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep="")
+      paste("TII-ExcelQA-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".zip", sep="")
+    },
+    content = function(filename){
+      
+      dfstoSave <- return_dfstoSave()
+      
+      tmpdir <- tempdir()
+      files <- c()
+      
+      if (appR_returned$num_road_opts_react() > 0) {
+        for (i in 1:appR_returned$num_road_opts_react()) {
+          path <- file.path(tmpdir, paste("TII-ExcelQA-RoadOpt", i, "-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep=""))
+          dfs_sub <- dfstoSave[grep(paste0("ro", i, "_"), names(dfstoSave))]
+          dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
+          names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
+          writexl::write_xlsx(dfs_sub, path)
+          files <- c(files, path)
+        }
+      }
+      
+      if (appR_returned$num_rail_opts_react() > 0) {
+        for (i in 1:appR_returned$num_rail_opts_react()) {
+          path <- file.path(tmpdir, paste("TII-ExcelQA-RailOpt", i, "-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep=""))
+          dfs_sub <- dfstoSave[grep(paste0("ra", i, "_"), names(dfstoSave))]
+          dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
+          names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
+          writexl::write_xlsx(dfs_sub, path)
+          files <- c(files, path)
+        }
+      }
+      
+      if (appR_returned$num_greenway_opts_react() > 0) {
+        for (i in 1:appR_returned$num_greenway_opts_react()) {
+          path <- file.path(tmpdir, paste("TII-ExcelQA-GreenwayOpt", i, "-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep=""))
+          dfs_sub <- dfstoSave[grep(paste0("gw", i, "_"), names(dfstoSave))]
+          dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
+          names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
+          writexl::write_xlsx(dfs_sub, path)
+          files <- c(files, path)
+        }
+      }
+      
+      zip::zip(zipfile = filename, files = files, mode = "cherry-pick")
+    }
+  )
+  
+  return_dfstoSave <- reactive({
+    
+    for (i in 1:nrow(collatedShinyInputs)){
+      collatedShinyInputs$Value[i] <- input[[collatedShinyInputs[i,1]]]
+    }
+    
+    ##### build save file with parameters and corresp. values
+    inputs_data_frame <- collatedShinyInputs[-1]
+    
+    ##### pull in data from rhandsontables
+    for (i in 1:nrow(collatedTableLoadFiles)){
+      assign(collatedTableLoadFiles[i,1], options_serv[[collatedTableLoadFiles[i,1]]])
+    }
+    
+    collatedTableLoadFiles[nrow(collatedTableLoadFiles)+1,] <- "inputs_data_frame"
+    
+    dfstoSave <- mget(unlist(collatedTableLoadFiles[1]))
+    dfstoSave
+  })
+  
 
   cat(file=stderr(), "*** output$downloadinputs:",session$token, "**** \n")
   
@@ -612,7 +693,6 @@ server <- function(input, output, session){
   
   cat(file=stderr(), "*** output$observeEvent(download_button_trigger$download_flag:",session$token, "**** \n")
  
-  
   # Import file to load -----
   # NEED TO PUT ERROR CATCH IN FOR CANCELLED FILE SLECTED
   observeEvent(input$LoadFileInput$name, {
