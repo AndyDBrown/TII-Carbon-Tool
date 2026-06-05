@@ -321,9 +321,11 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    } else {
                      
                    
-                   
                    # Load data from the load file into rhandsontables and reactivevalues
                    tmpData <- appR_returned$data[[paste0(id,"_cadaTbl")]]
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`) # remove EF column, if it exists in save file
+                   }
                    colnames(tmpData) <- colnames(DF_clearance)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -333,6 +335,9 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_lucavlTbl")]]
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`) # remove EF column, if it exists in save file
+                   }
                    colnames(tmpData) <- colnames(DF_lucavl)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -342,6 +347,9 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_wudcdaTbl")]]
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`) # remove EF column, if it exists in save file
+                   }
                    colnames(tmpData) <- colnames(DF_wudcda)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -441,8 +449,14 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$cadaTblResave = clearancevalues$data
                    
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   clearancevalues_withEFs <- clearancevalues$data %>%
+                     dplyr::left_join(., efs$Activity_Road[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
+                   preconst_returned$cadaTblResave = clearancevalues_withEFs
+
                    removeModal()
                  })
                  
@@ -476,7 +490,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value <- c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
                    preconst_returned$details <- as.data.table(clearancevalues$data)[, c("Clearance Category","Activity Emissions tCO2e")][, Option := as.numeric(stringr::str_sub(id, start = -1))]
-                   preconst_returned$cadaTblResave = clearancevalues$data
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   clearancevalues_withEFs <- clearancevalues$data %>%
+                     dplyr::left_join(., efs$Activity_Road[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
+                   preconst_returned$cadaTblResave = clearancevalues_withEFs
                    
                    removeModal()
                  })
@@ -492,7 +512,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                           unique %>% stringr::str_sort(numeric = TRUE), selected = clearancevalues$data[input$cadaTbl_rows_selected,3]),
                          numericInput(ns("cada_add_col4"), label = "Quantity", value = clearancevalues$data[input$cadaTbl_rows_selected,4]),
                          selectizeInput(ns("cada_add_col5"), label = "Unit", choices = c("ha")),
-                         textInput(ns("cada_add_col6"), label = "Comments"),
+                         textInput(ns("cada_add_col6"), label = "Comments", value = clearancevalues$data[input$cadaTbl_rows_selected,7]),
                          
                          hidden(numericInput(ns("cada_mod_rown"), value = input$cadaTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("cada_confirm_mod"),"Confirm"),
@@ -507,6 +527,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                  })
                  
                  observeEvent(input$cada_confirm_mod, {
+                   #browser()
                    new_row = data.frame(input$cada_add_col1,
                                         input$cada_add_col2,
                                         input$cada_add_col3,
@@ -524,7 +545,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$cadaTblResave = clearancevalues$data
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   clearancevalues_withEFs <- clearancevalues$data %>%
+                     dplyr::left_join(., efs$Activity_Road[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
+                   preconst_returned$cadaTblResave = clearancevalues_withEFs
                    
                    removeModal()
                  })
@@ -554,7 +581,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                      sum_cada_tCO2$data <- sum(na.omit(clearancevalues$data$`Activity Emissions tCO2e`))
                      sum_preconst_tCO2$data = sum(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data)
                      preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                     preconst_returned$cadaTblResave = clearancevalues$data
+                     
+                     # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                     clearancevalues_withEFs <- clearancevalues$data %>%
+                       dplyr::left_join(., efs$Activity_Road[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     
+                     preconst_returned$cadaTblResave = clearancevalues_withEFs
                    } else {
                      showModal(
                        modalDialog(
@@ -603,7 +636,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$lucavlTblResave = lucavlvalues$data
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   lucavlvalues_withEFs <- lucavlvalues$data %>%
+                     dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
+                   preconst_returned$lucavlTblResave = lucavlvalues_withEFs
                    
                    removeModal()
                  })
@@ -638,8 +677,14 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value <- c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
                    preconst_returned$details <- as.data.table(lucavlvalues$data)[, c("Vegetation Type","Carbon Sink tCO2e (removed)")][, Option := as.numeric(stringr::str_sub(id, start = -1))]
-                   preconst_returned$lucavlTblResave = lucavlvalues$data
                    
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   lucavlvalues_withEFs <- lucavlvalues$data %>%
+                     dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
+                   preconst_returned$lucavlTblResave = lucavlvalues_withEFs
+
                    removeModal()
                  })
                  
@@ -652,7 +697,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                           unique %>% stringr::str_sort(numeric = TRUE), selected = lucavlvalues$data[input$lucavlTbl_rows_selected,1]),
                          numericInput(ns("lucavl_add_col2"), label = "Quantity", value = lucavlvalues$data[input$lucavlTbl_rows_selected,2]),
                          selectizeInput(ns("lucavl_add_col3"), label = "Unit", choices = c("ha")),
-                         textInput(ns("lucavl_add_col4"), label = "Comments"),
+                         textInput(ns("lucavl_add_col4"), label = "Comments", value = lucavlvalues$data[input$lucavlTbl_rows_selected,5]),
 
                          hidden(numericInput(ns("lucavl_mod_rown"), value = input$lucavlTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("lucavl_confirm_mod"),"Confirm"),
@@ -683,8 +728,14 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$lucavlTblResave = lucavlvalues$data
                    
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   lucavlvalues_withEFs <- lucavlvalues$data %>%
+                     dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
+                   preconst_returned$lucavlTblResave = lucavlvalues_withEFs
+
                    removeModal()
                  })
                  
@@ -712,7 +763,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                      sum_lucavl_tCO2$data <- sum(na.omit(lucavlvalues$data$`Carbon Sink tCO2e (removed)`))
                      sum_preconst_tCO2$data = sum(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data)
                      preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                     preconst_returned$lucavlTblResave = lucavlvalues$data
+                     
+                     # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                     lucavlvalues_withEFs <- lucavlvalues$data %>%
+                       dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     
+                     preconst_returned$lucavlTblResave = lucavlvalues_withEFs
                    } else {
                      showModal(
                        modalDialog(
@@ -755,7 +812,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                         "Activity tCO2e" = 0,
                                         input$wudcda_add_col5) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.wudcda_add_col2" = "Water")) %>%
-                     dplyr::mutate(`Activity tCO2e` = input.wudcda_add_col3 * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::mutate(`Activity.tCO2e` = input.wudcda_add_col3 * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::select(., -`kgCO2e per unit`)
                    
                    wudcdavalues$data <- data.table(rbind(wudcdavalues$data, new_row, use.names = F))
@@ -764,7 +821,12 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$wudcdaTblResave = wudcdavalues$data
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   wudcdavalues_withEFs <- wudcdavalues$data %>%
+                     dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
                    
                    removeModal()
                  })
@@ -797,7 +859,12 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value <- c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$wudcdaTblResave = wudcdavalues$data
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   wudcdavalues_withEFs <- wudcdavalues$data %>%
+                     dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
                    #preconst_returned$details <- as.data.table(lucavlvalues$data)[, c("Vegetation Type","Carbon Sink tCO2e (removed)")][, Option := as.numeric(stringr::str_sub(id, start = -1))]
                    
                    removeModal()
@@ -814,7 +881,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                          selectizeInput(ns("wudcda_add_col2"), label = "Water Use", choices = c("Water Use - UK Average")),
                          numericInput(ns("wudcda_add_col3"), label = "Quantity", value = wudcdavalues$data[input$wudcdaTbl_rows_selected,3]),
                          selectizeInput(ns("wudcda_add_col4"), label = "Unit", choices = c("litres")),
-                         textInput(ns("wudcda_add_col5"), label = "Comments"),
+                         textInput(ns("wudcda_add_col5"), label = "Comments", value = wudcdavalues$data[input$wudcdaTbl_rows_selected,6]),
                          
                          hidden(numericInput(ns("wudcda_mod_rown"), value = input$wudcdaTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("wudcda_confirm_mod"),"Confirm"),
@@ -846,8 +913,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                                 sum_lucavl_tCO2$data,
                                                 sum_wudcda_tCO2$data)
                    preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                   preconst_returned$wudcdaTblResave = wudcdavalues$data
                    
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   wudcdavalues_withEFs <- wudcdavalues$data %>%
+                     dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
+
                    removeModal()
                  })
                  
@@ -878,7 +950,12 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                      sum_wudcda_tCO2$data <- sum(na.omit(wudcdavalues$data$`Activity tCO2e`))
                      sum_preconst_tCO2$data = sum(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data)
                      preconst_returned$data$Value = c(sum_cada_tCO2$data, sum_lucavl_tCO2$data, sum_wudcda_tCO2$data, sum_preconst_tCO2$data)
-                     preconst_returned$wudcdaTblResave = wudcdavalues$data
+                     
+                     # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                     wudcdavalues_withEFs <- wudcdavalues$data %>%
+                       dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
                    } else {
                      showModal(
                        modalDialog(
