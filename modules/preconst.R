@@ -330,7 +330,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
                    clearancevalues$data <- tmpData
-                   preconst_returned$cadaTblResave = tmpData
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   clearancevalues_withEFs <- tmpData %>%
+                     dplyr::left_join(., efs$Activity_Road[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   preconst_returned$cadaTblResave = clearancevalues_withEFs
+
                    sum_cada_tCO2$data <- sum(na.omit(tmpData$`Activity Emissions tCO2e`)) # get total carbon emissions
                    
                    
@@ -342,7 +348,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
                    lucavlvalues$data <- tmpData
-                   preconst_returned$lucavlTblResave = tmpData
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   lucavlvalues_withEFs <- tmpData %>%
+                     dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   preconst_returned$lucavlTblResave = lucavlvalues_withEFs
+
                    sum_lucavl_tCO2$data <- sum(na.omit(tmpData$`Carbon Sink tCO2e`)) # get total carbon emissions
                    
                    
@@ -354,7 +366,13 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
                    wudcdavalues$data <- tmpData
-                   preconst_returned$wudcdaTblResave = tmpData
+                   
+                   # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   wudcdavalues_withEFs <- tmpData %>%
+                     dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
+
                    sum_wudcda_tCO2$data = sum(na.omit(tmpData$`Activity tCO2e`)) # get total carbon emissions
                    
                    
