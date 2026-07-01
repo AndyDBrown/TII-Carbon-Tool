@@ -193,6 +193,7 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
   DF_mpfueluse = data.table(`Fuel Type` = "Grid Electricity - Ireland",
                             `Annual Quantity` = c(0.0,0.0,0.0,0.0,0.0),
                             Unit = "kWh", 
+                            `kgCO2e per unit` = 0.0,
                             `Annual Emissions tCO2e` = 0.0,
                             `Comments` = "",
                             stringsAsFactors = F, check.names = FALSE)
@@ -310,6 +311,10 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_mpfuTbl")]] # id
+                   if ("kgCO2e per unit" %notin% names(tmpData)) {
+                     tmpData$`kgCO2e per unit` <- 0.0
+                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   }
                    colnames(tmpData) <- colnames(DF_mpfueluse)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -402,8 +407,9 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                                         "Annual Emissions tCO2e" = 0,
                                         input$mpfu_add_col4) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.mpfu_add_col1" = "Fuel")) %>%
-                     dplyr::mutate(`Annual.Emissions.tCO2e` = input.mpfu_add_col2 * `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.mpfu_add_col3") %>%
+                     dplyr::mutate(`Annual.Emissions.tCO2e` = input.mpfu_add_col2 * `kgCO2e per unit` * kgConversion) #%>%
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    mpfuvalues$data <- data.table(rbind(mpfuvalues$data, new_row, use.names = F))
                    
@@ -459,7 +465,7 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                                         selected = mpfuvalues$data[input$mpfuTbl_rows_selected,1]),
                          numericInput(ns("mpfu_mod_col2"), label = "Annual Quantity", value = mpfuvalues$data[input$mpfuTbl_rows_selected,2]),
                          uiOutput(ns("mpfu_mod_col3_out")),
-                         textInput(ns("mpfu_mod_col4"), label = "Comments", value = mpfuvalues$data[input$mpfuTbl_rows_selected,5]),
+                         textInput(ns("mpfu_mod_col4"), label = "Comments", value = mpfuvalues$data[input$mpfuTbl_rows_selected,6]),
                          
                          hidden(numericInput(ns("mpfu_mod_rown"), value = input$mpfuTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("mpfu_confirm_mod"),"Confirm"),
@@ -493,8 +499,9 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                                         "Annual Emissions tCO2e" = 0,
                                         input$mpfu_mod_col4) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.mpfu_mod_col1" = "Fuel")) %>%
-                     dplyr::mutate(`Annual.Emissions.tCO2e` = input.mpfu_mod_col2 * `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.mpfu_mod_col3") %>%
+                     dplyr::mutate(`Annual.Emissions.tCO2e` = input.mpfu_mod_col2 * `kgCO2e per unit` * kgConversion) #%>%
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    mpfuvalues$data[input$mpfu_mod_rown,] <- new_row
                    
@@ -521,10 +528,11 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                      
                      if (typeof(templateIn$`Annual Quantity`) == "character"){templateIn$`Annual Quantity` <- as.numeric(templateIn$`Annual Quantity`)}
                      
-                     templateIn_data <- bind_rows(mpfuvalues$data, templateIn) %>%
+                     templateIn_data <- bind_rows(mpfuvalues$data %>% dplyr::select(-`kgCO2e per unit`), templateIn) %>%
                        dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
                        dplyr::mutate(`Annual Emissions tCO2e` = `Annual Quantity` * `kgCO2e per unit` * kgConversion) %>%
-                       dplyr::select(., -`kgCO2e per unit`) %>%
+                       #dplyr::select(., -`kgCO2e per unit`) %>%
                        dplyr::filter(`Annual Quantity` > 0)
                      
                      mpfuvalues$data <- templateIn_data
