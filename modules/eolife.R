@@ -386,7 +386,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  # Decommissioning Activities/energy use table - change to datatables ----
                  output$deconTbl <- DT::renderDT({
                    DT = deconvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(8), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -594,7 +594,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  # Decommissioning Waste table - change to datatables ----
                  output$wasManTbl <- DT::renderDT({
                    DT = wasvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit waste`, -`kgCO2e per unit trans`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(8,9), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -671,6 +671,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  wasMan_unit_choices <- reactive({
+                   req(input$wasMan_add_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$wasMan_add_col1) %>%
                      filter(`Waste Route` == input$wasMan_add_col2) %>%
@@ -732,11 +733,13 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        modalDialog(
                          title = "Modify Row",
                          
-                         selectizeInput(ns("wasMan_mod_col1"), label = "Waste Type", choices = eolife_wasMan_wasType_dropdown),
+                         selectizeInput(ns("wasMan_mod_col1"), label = "Waste Type", choices = eolife_wasMan_wasType_dropdown,
+                                        selected = wasvalues$data[input$wasManTbl_rows_selected,1]),
                          uiOutput(ns("wasMan_mod_col2_out")),
                          numericInput(ns("wasMan_mod_col3"), label = "Quantity", value = wasvalues$data[input$wasManTbl_rows_selected,3]),
                          uiOutput(ns("wasMan_mod_col4_out")),
-                         selectizeInput(ns("wasMan_mod_col5"), label = "Transport Mode", choices = transmodewasteTbl_dropdown_opts_road$Vehicle),
+                         selectizeInput(ns("wasMan_mod_col5"), label = "Transport Mode", choices = transmodewasteTbl_dropdown_opts_road$Vehicle,
+                                        selected = wasvalues$data[input$wasManTbl_rows_selected,6]),
                          numericInput(ns("wasMan_mod_col6"), label = "Distance", value = wasvalues$data[input$wasManTbl_rows_selected,7]),
                          uiOutput(ns("wasMan_mod_col7_out")),
                          textInput(ns("wasMan_mod_col8"), label = "Comments", value = wasvalues$data[input$wasManTbl_rows_selected,12]),
@@ -754,7 +757,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  output$wasMan_mod_col2_out <- renderUI({
-                   selectizeInput(ns("wasMan_mod_col2"), label = "Waste Route", choices = wasMan_wasteroute_choices_mod())
+                   selectizeInput(ns("wasMan_mod_col2"), label = "Waste Route", choices = wasMan_wasteroute_choices_mod(),
+                                  selected = wasvalues$data[input$wasManTbl_rows_selected,2])
                  })
                  
                  wasMan_wasteroute_choices_mod <- reactive({
@@ -769,6 +773,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  wasMan_unit_choices_mod <- reactive({
+                   req(input$wasMan_mod_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$wasMan_mod_col1) %>%
                      filter(`Waste Route` == input$wasMan_mod_col2) %>%

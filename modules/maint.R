@@ -369,7 +369,7 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                  # Operational Energy Use - change to datatables ----
                  output$mpfuTbl <- DT::renderDT({
                    DT = mpfuvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(4), currency = "", interval = 3, mark = ",", digits = 3)
                  })

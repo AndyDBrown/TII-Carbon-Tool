@@ -893,6 +893,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                  })
                  
                  excav_unit_choices <- reactive({
+                   req(input$excav_add_col2, input$excav_add_col3)
                    unit_options <- dropdown_options_excavTbl %>% 
                      filter(`Category` %like% "Earthworks" & `Sub Category` == input$excav_add_col2
                             & Activity == input$excav_add_col3) %>%
@@ -1013,6 +1014,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                  })
                  
                  excav_unit_choices_mod <- reactive({
+                   req(input$excav_mod_col2, input$excav_mod_col3)
                    unit_options <- dropdown_options_excavTbl %>% 
                      filter(`Category` %like% "Earthworks" & `Sub Category` == input$excav_mod_col2
                             & Activity == input$excav_mod_col3) %>%
@@ -1201,9 +1203,9 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         selected = constrvalues$data[input$constrTbl_rows_selected,2]),
                          numericInput(ns("constr_mod_col3"), label = "Fuel Use Per Hour", value = constrvalues$data[input$constrTbl_rows_selected,3]),
                          uiOutput(ns("constr_mod_col4_out")),
-                         numericInput(ns("constr_mod_col5"), label = "Operating Time (Hours Per Day)", value = constrvalues$data[input$constrTbl_rows_selected,5]),
-                         numericInput(ns("constr_mod_col6"), label = "Total Days", value = constrvalues$data[input$constrTbl_rows_selected,6]),
-                         textInput(ns("constr_mod_col7"), label = "Comments", value = constrvalues$data[input$constrTbl_rows_selected,8]),
+                         numericInput(ns("constr_mod_col5"), label = "Operating Time (Hours Per Day)", value = constrvalues$data[input$constrTbl_rows_selected,6]),
+                         numericInput(ns("constr_mod_col6"), label = "Total Days", value = constrvalues$data[input$constrTbl_rows_selected,7]),
+                         textInput(ns("constr_mod_col7"), label = "Comments", value = constrvalues$data[input$constrTbl_rows_selected,9]),
                          
                          hidden(numericInput(ns("constr_mod_rown"), value = input$constrTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("constr_confirm_mod"),"Confirm"),
@@ -1929,6 +1931,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                  })
                  
                  constrwaste_unit_choices <- reactive({
+                   req(input$constrwaste_add_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$constrwaste_add_col1) %>%
                      filter(`Waste Route` == input$constrwaste_add_col2) %>%
@@ -1983,11 +1986,13 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                        modalDialog(
                          title = "Modify Row",
                          
-                         selectizeInput(ns("constrwaste_mod_col1"), label = "Waste Type", choices = waste_init_options),
+                         selectizeInput(ns("constrwaste_mod_col1"), label = "Waste Type", choices = waste_init_options,
+                                        selected = constrwastevalues$data[input$constrwasteTbl_rows_selected, 1]),
                          uiOutput(ns("constrwaste_mod_col2_out")),
                          numericInput(ns("constrwaste_mod_col3"), label = "Quantity", value = constrwastevalues$data[input$constrwasteTbl_rows_selected, 3]),
                          uiOutput(ns("constrwaste_mod_col4_out")),
-                         selectizeInput(ns("constrwaste_mod_col5"), label = "Mode", choices = trans_mode_options$Vehicle),
+                         selectizeInput(ns("constrwaste_mod_col5"), label = "Mode", choices = trans_mode_options$Vehicle,
+                                        selected = constrwastevalues$data[input$constrwasteTbl_rows_selected, 6]),
                          numericInput(ns("constrwaste_mod_col6"), label = "Distance", value = constrwastevalues$data[input$constrwasteTbl_rows_selected, 7]),
                          uiOutput(ns("constrwaste_mod_col7_out")),
                          textInput(ns("constrwaste_mod_col8"), label = "Comments", value = constrwastevalues$data[input$constrwasteTbl_rows_selected, 12]),
@@ -2005,7 +2010,8 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                  })
                  
                  output$constrwaste_mod_col2_out <- renderUI({
-                   selectizeInput(ns("constrwaste_mod_col2"), label = "Waste Route", choices = constrwaste_wasteroute_choices_mod())
+                   selectizeInput(ns("constrwaste_mod_col2"), label = "Waste Route", choices = constrwaste_wasteroute_choices_mod(),
+                                  selected = constrwastevalues$data[input$constrwasteTbl_rows_selected, 2])
                  })
                  
                  constrwaste_wasteroute_choices_mod <- reactive({
@@ -2020,6 +2026,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                  })
                  
                  constrwaste_unit_choices_mod <- reactive({
+                   req(input$constrwaste_mod_col2)#browser()
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$constrwaste_mod_col1) %>%
                      filter(`Waste Route` == input$constrwaste_mod_col2) %>%

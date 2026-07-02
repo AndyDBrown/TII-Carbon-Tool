@@ -705,7 +705,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  # Operational Energy Use - change to datatables ----
                  output$oeuTbl <- DT::renderDT({
                    DT = oeuvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(5), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -900,7 +900,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  # Operational Water Use - change to datatables ----
                  output$owuTbl <- DT::renderDT({
                    DT = owuvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(4), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -1060,7 +1060,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  # Operational Waste - change to datatables ----
                  output$operwasteTbl <- DT::renderDT({
                    DT = operwastevalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit waste`, -`kgCO2e per unit trans`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(8,9), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -1135,6 +1135,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  })
                  
                  operwaste_unit_choices <- reactive({
+                   req(input$operwaste_add_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$operwaste_add_col1) %>%
                      filter(`Waste Route` == input$operwaste_add_col2) %>%
@@ -1218,7 +1219,8 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  })
                  
                  output$operwaste_mod_col2_out <- renderUI({
-                   selectizeInput(ns("operwaste_mod_col2"), label = "Waste Route", choices = operwaste_wasteroute_choices_mod())
+                   selectizeInput(ns("operwaste_mod_col2"), label = "Waste Route", choices = operwaste_wasteroute_choices_mod(),
+                                  selected = operwastevalues$data[input$operwasteTbl_rows_selected,2])
                  })
                  
                  operwaste_wasteroute_choices_mod <- reactive({
@@ -1233,6 +1235,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  })
                  
                  operwaste_unit_choices_mod <- reactive({
+                   req(input$operwaste_mod_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$operwaste_mod_col1) %>%
                      filter(`Waste Route` == input$operwaste_mod_col2) %>%
@@ -1345,7 +1348,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                  # Landscaping & Vegetation - change to datatables ----
                  output$landvegconstrTbl <- DT::renderDT({
                    DT = landvegconstrvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(4), currency = "", interval = 3, mark = ",", digits = 3)
                  })
