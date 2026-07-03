@@ -248,6 +248,8 @@ jsTrimDrop <- HTML(readr::read_file("www/trimdrop.js"))
 # efs <<- rio::import_list("emission_factors/Emission_Factors_May2025_CompGroup.xlsx", setclass = "data.table") # imports all EF data as a list
 efs <<- rio::import_list("emission_factors/Emission_Factors_13-MAR-2026.xlsx", setclass = "data.table") # imports all EF data as a list
 
+# import patch spreadsheet for new EFs 2026
+efs_patch <<- rio::import_list("emission_factors/EF_2026_Update_Patch.xlsx", setclass = "data.table")
 
 
 fuels <- efs$Fuel
