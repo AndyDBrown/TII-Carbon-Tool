@@ -651,18 +651,6 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        #if (id == "embcarbonro1"){browser()}
                        ## Update emissions in table here - this is in case we get updated EF library#
                        projectLifetime <- as.numeric(appR_returned$data$inputs_data_frame$Value[8])
-                       tmpData_recalc <- left_join(tmpData,dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
-                       # tmpData_recalc <- left_join(tmpData,efs_react$data$Material_Road, by = c("Category", "Sub Category", "Material", "Unit")) # need to add in a line before this to add manual EFs to dropdown options! Done see prev line
-                       tmpData_recalc$`Embodied tCO2e` = tmpData_recalc$Quantity *  tmpData_recalc$`kgCO2e per unit` * kgConversion
-                       tmpData_recalc$`Default Maintenance Percentage` = (projectLifetime / tmpData_recalc$`Regularity of maintenance cycle`) * tmpData_recalc$`% replaced in 1 maintenance cycle`
-                       tmpData_recalc$`Default Maintenance Percentage`[is.nan(tmpData_recalc$`Default Maintenance Percentage`)] = 0 ## correct inf error from above
-                       #tmpData_recalc$`Maintenance tCO2e` = tmpData_recalc$`Default Maintenance Percentage` * tmpData_recalc$`Embodied tCO2e`
-                       tmpData_recalc[`Custom Maintenance`=="N", `Maintenance tCO2e` := `Default Maintenance Percentage` * `Embodied tCO2e`]
-                       # tmpData_recalc <- tmpData_recalc[-c("kgCO2e per unit", "% replaced in 1 maintenance cycle", "Regularity of maintenance cycle")]
-                       tmpData = tmpData_recalc[,1:ncol(tmpData)]
-                       ### End
-                       
-                       
                        
                        # identify if any entries need patching over to the new EFs by joining to table
                        #if (id == "embcarbonro1"){browser()}
@@ -682,6 +670,18 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        #cat_subcat_changes <- cat_subcat_changes %>%
                        #  dplyr::mutate(Category = `Category-NEW`, `Sub Category` = `Sub Category-NEW`) %>%
                        #  dplyr::select(-`Category-NEW`, `Sub Category-NEW`)
+                       
+                       
+                       tmpData_recalc <- left_join(tmpData,dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
+                       # tmpData_recalc <- left_join(tmpData,efs_react$data$Material_Road, by = c("Category", "Sub Category", "Material", "Unit")) # need to add in a line before this to add manual EFs to dropdown options! Done see prev line
+                       tmpData_recalc$`Embodied tCO2e` = tmpData_recalc$Quantity *  tmpData_recalc$`kgCO2e per unit` * kgConversion
+                       tmpData_recalc$`Default Maintenance Percentage` = (projectLifetime / tmpData_recalc$`Regularity of maintenance cycle`) * tmpData_recalc$`% replaced in 1 maintenance cycle`
+                       tmpData_recalc$`Default Maintenance Percentage`[is.nan(tmpData_recalc$`Default Maintenance Percentage`)] = 0 ## correct inf error from above
+                       #tmpData_recalc$`Maintenance tCO2e` = tmpData_recalc$`Default Maintenance Percentage` * tmpData_recalc$`Embodied tCO2e`
+                       tmpData_recalc[`Custom Maintenance`=="N", `Maintenance tCO2e` := `Default Maintenance Percentage` * `Embodied tCO2e`]
+                       # tmpData_recalc <- tmpData_recalc[-c("kgCO2e per unit", "% replaced in 1 maintenance cycle", "Regularity of maintenance cycle")]
+                       tmpData = tmpData_recalc[,1:ncol(tmpData)]
+                       ### End
                        
                        
                        rmecvalues$data = tmpData
@@ -1660,7 +1660,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                  
                  ##  Observe changes to the project lifetime and update the rhandsontable maintenance percentage based on this
                  observeEvent(projectdetails_values$lifeTime, {  #  req(input$rmecTbl, projectdetails_values$lifeTime)
-                   if (id == "embcarbonro1"){browser()}
+                   #if (id == "embcarbonro1"){browser()}
                    #observer for lifetime change
                    if (length(which(rmecvalues$data$Quantity > 0)) > 0){ # prevents code block running when app (and 'projectdetails_values' reactive) initialise
                      #
