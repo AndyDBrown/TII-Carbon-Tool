@@ -625,13 +625,17 @@ server <- function(input, output, session){
       
       tmpdir <- tempdir()
       files <- c()
-      
+      #browser()
       if (appR_returned$num_road_opts_react() > 0) {
         for (i in 1:appR_returned$num_road_opts_react()) {
           path <- file.path(tmpdir, paste("TII-ExcelQA-RoadOpt", i, "-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep=""))
           dfs_sub <- dfstoSave[grep(paste0("ro", i, "_"), names(dfstoSave))]
-          dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
-          names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
+          dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)] # remove carbon savings tables
+          names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub)) # remove "Tbl"
+          names(dfs_sub) <- gsub("ro\\d", "", names(dfs_sub)) # remove the road/rail/gw option and number to shorten
+          tmp_names <- as.data.table(names(dfs_sub))
+          tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names")) # replace tab names here
+          names(dfs_sub) <- as.character(tmp_names$excel_tab_names) # replace tab names here
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)
         }
@@ -643,6 +647,10 @@ server <- function(input, output, session){
           dfs_sub <- dfstoSave[grep(paste0("ra", i, "_"), names(dfstoSave))]
           dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
           names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
+          names(dfs_sub) <- gsub("ra\\d", "", names(dfs_sub))
+          tmp_names <- as.data.table(names(dfs_sub))
+          tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names"))
+          names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)
         }
@@ -654,6 +662,10 @@ server <- function(input, output, session){
           dfs_sub <- dfstoSave[grep(paste0("gw", i, "_"), names(dfstoSave))]
           dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
           names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
+          names(dfs_sub) <- gsub("gw\\d", "", names(dfs_sub))
+          tmp_names <- as.data.table(names(dfs_sub))
+          tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names"))
+          names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)
         }
