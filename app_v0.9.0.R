@@ -625,7 +625,6 @@ server <- function(input, output, session){
       
       tmpdir <- tempdir()
       files <- c()
-      #browser()
       if (appR_returned$num_road_opts_react() > 0) {
         for (i in 1:appR_returned$num_road_opts_react()) {
           path <- file.path(tmpdir, paste("TII-ExcelQA-RoadOpt", i, "-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep=""))
@@ -649,7 +648,7 @@ server <- function(input, output, session){
           names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
           names(dfs_sub) <- gsub("ra\\d", "", names(dfs_sub))
           tmp_names <- as.data.table(names(dfs_sub))
-          tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names"))
+          tmp_names <- dplyr::left_join(tmp_names, excel_export_names_rail, by=c("V1" = "tbl_names"))
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)

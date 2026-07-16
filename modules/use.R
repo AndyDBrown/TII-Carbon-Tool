@@ -488,26 +488,32 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                    
                    
                    # Load data from the load file into rhandsontables and reactivevalues
-                   tmpData <- appR_returned$data[[paste0(id,"_oeuTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
-                   }
-                   colnames(tmpData) <- colnames(DF_energyuse)
-                   tmpData$`Comments` <- as.character(tmpData$`Comments`)
-                   tmpData$Unit <- as.character(tmpData$Unit)
-                   oeuvalues$data <- tmpData
-                   use_returned$oeuTblResave = tmpData
+                     tmpData <- appR_returned$data[[paste0(id,"_oeuTbl")]]
+                     if ("kgCO2e per unit" %in% names(tmpData)) {
+                       tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
+                     }
+                     tmpData <- tmpData %>% 
+                       dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     
+                     colnames(tmpData) <- colnames(DF_energyuse)
+                     tmpData$`Comments` <- as.character(tmpData$`Comments`)
+                     tmpData$Unit <- as.character(tmpData$Unit)
+                     oeuvalues$data <- tmpData
+                     use_returned$oeuTblResave = tmpData
                    
                    sum_oeu_tCO2$data = sum(na.omit(tmpData$`Annual Emissions tCO2e`)) * projectdetails_values$lifeTime
                    
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_owuTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
                    colnames(tmpData) <- colnames(DF_wateruse)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -519,12 +525,23 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_operwasteTbl")]]
-                   if ("kgCO2e per unit waste" %notin% names(tmpData) | "kgCO2e per unit trans" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit waste` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit waste`, .after = "Unit")
-                     tmpData$`kgCO2e per unit trans` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit trans`, .after = "Distance Unit")
+                   if ("kgCO2e per unit waste" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit waste`)
                    }
+                   if ("kgCO2e per unit trans" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit trans`)
+                   }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
+                                      by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     #dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
+                     dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
+                     #dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
+                   
                    colnames(tmpData) <- colnames(DF_operwaste)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -537,10 +554,16 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                    
                    #
                    tmpData <- appR_returned$data[[paste0(id,"_landvegconstrTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
+                   }
+                   tmpData <- tmpData %>%
+                     dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") 
+                   
                      tmpData$`kgCO2e per unit` <- 0.0
                      tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
-                   }
+                   
                    colnames(tmpData) <- colnames(DF_landvegconstrTbl)
                    tmpData$Unit <- as.character(tmpData$Unit)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)

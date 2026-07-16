@@ -200,6 +200,7 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                         `Energy Type` = "Grid Electricity - Ireland",
                         `Annual Consumption` = c(0.0),
                         Unit = "kWh (Net CV)", 
+                        `kgCO2e per unit` = 0.0,
                         `Annual Emissions tCO2e` = 0.0,
                         `Total emissions from train operation for project lifetime` = 0.0,
                         stringsAsFactors = F, check.names = FALSE)
@@ -318,6 +319,13 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                    
                    
                    tmpData <- appR_returned$data[[paste0(id, "_trainTbl")]]
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
+                   }
+                     tmpData <- tmpData %>% 
+                       dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
                    colnames(tmpData) <- colnames(DF_train)
                    trainvalues$data <- tmpData
                    useremis_returned$trainTblResave = tmpData
@@ -440,20 +448,20 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                  
                  output$trainTbl <- DT::renderDT({
                    DT = trainvalues$data
-                   datatable(DT, options = list(dom="t"),
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), options = list(dom="t"),
                              escape=F, rownames= FALSE)
                  })
                  
                  observeEvent(input$train_mod_row_head, {
                    ### This is the pop up board for input a new row
                    showModal(modalDialog(
-                     title = "Add a new row",
+                     title = "Modify Row",
                      
                      selectizeInput(ns("train_add_col1"), label = "Energy Use Category", choices = "Train Operation"),
                      selectizeInput(ns("train_add_col2"), label = "Energy Type", choices = "Grid Electricity - Ireland"),
                      numericInput(ns("train_add_col3"), label = "Annual Consumption", value = trainvalues$data[input$trainTbl_rows_selected,3]),
                      selectizeInput(ns("train_add_col4"), label = "Unit", choices = "kWh (Net CV)"),
-                     actionButton(ns("train_add_row_go"), "Add item"),
+                     actionButton(ns("train_add_row_go"), "Confirm"),
                      easyClose = TRUE, footer = NULL ))
                  })
                  
@@ -466,10 +474,11 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                                         "Annual Emissions tCO2e" = 0,
                                         "Total emissions from train operation for project lifetime" = 0) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.train_add_col2" = "Fuel")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.train_add_col4") %>%
                      dplyr::mutate(`Annual.Emissions.tCO2e` = input.train_add_col3 * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::mutate(`Total.emissions.from.train.operation.for.project.lifetime` = 
-                                     input.train_add_col3 * `kgCO2e per unit` * kgConversion * projectdetails_values$lifeTime) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                                     input.train_add_col3 * `kgCO2e per unit` * kgConversion * projectdetails_values$lifeTime) #%>%
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    trainvalues$data[1,] <- new_row
                    sum_train_tCO2$data = sum(na.omit(trainvalues$data$`Annual Emissions tCO2e`)) * projectdetails_values$lifeTime # get annual carbon emissions

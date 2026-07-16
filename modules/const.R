@@ -676,10 +676,13 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    
                    # Load data from the load file into rhandsontables and reactivevalues
                    tmpData <- appR_returned$data[[paste0(id,"_excavTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                     tmpData <- tmpData %>%
+                       dplyr::left_join(., dropdown_options_excavTbl[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
                    colnames(tmpData) <- colnames(DF_excavTbl)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -688,12 +691,15 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    
                    sum_excav_tCO2$data = sum(na.omit(as.numeric(tmpData$`Activity tCO2e`))) # get carbon emissions
                    
-                   
+                   #if (id == "constro1"){browser()}
                    tmpData <- appR_returned$data[[paste0(id,"_constrTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                     tmpData <- tmpData %>%
+                       dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
                    colnames(tmpData) <- colnames(DF_constrTbl)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -705,10 +711,13 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    tmpData2 <- appR_returned$data[[paste0(id,"_constrTblAlt")]]
                    
                    if (!is.null(tmpData2)){
-                     if ("kgCO2e per unit" %notin% names(tmpData2)) {
-                       tmpData2$`kgCO2e per unit` <- 0.0
-                       tmpData2 <- tmpData2 %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     if ("kgCO2e per unit" %in% names(tmpData2)) {
+                       tmpData2 <- tmpData2 %>% dplyr::select(., -`kgCO2e per unit`)
                      }
+                     tmpData2 <- tmpData2 %>% 
+                       dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")  
+                     
                      colnames(tmpData2) <- colnames(DF_constrTbl_alt)
                      tmpData2$Comments <- as.character(tmpData2$Comments)
                      tmpData2$Unit <- as.character(tmpData2$Unit)
@@ -724,10 +733,13 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_wuconstrTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
                    if (ncol(tmpData)==6){tmpData$Comments <- as.character(NA)}
                    colnames(tmpData) <- colnames(DF_wuconstrTbl)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -754,11 +766,13 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_worktravelconstrTbl")]]
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% 
-                       dplyr::relocate(., `kgCO2e per unit`, .after = "Total distance travelled by workers during construction (km)")
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Mode of Transport" = "Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Total distance travelled by workers during construction (km)")
+                   
                    colnames(tmpData) <- colnames(DF_worktravelconstrTbl)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)
                    worktravelconstrvalues$data <- tmpData
@@ -779,12 +793,23 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_constrwasteTbl")]]
-                   if ("kgCO2e per unit waste" %notin% names(tmpData) | "kgCO2e per unit trans" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit waste` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit waste`, .after = "Unit")
-                     tmpData$`kgCO2e per unit trans` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit trans`, .after = "Distance Unit")
+                   if ("kgCO2e per unit waste" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit waste`)
                    }
+                   if ("kgCO2e per unit trans" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit trans`)
+                   }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
+                                      by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     #dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
+                     dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
+                     #dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
+                   
                    colnames(tmpData) <- colnames(DF_constrwaste)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
