@@ -718,11 +718,13 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                      
                      
                      tmpData <- appR_returned$data[[paste0(id,"_transTbl")]]
-                     if ("kgCO2e per unit" %notin% names(tmpData)) {
+                     if ("kgCO2e per unit" %in% names(tmpData)) {
+                       tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
+                     }
                        tmpData <- tmpData %>%
                          dplyr::left_join(., trans_mode_options[, c("Vehicle","kgCO2e per unit")], by = c("Transport Type" = "Vehicle")) %>%
                          dplyr::relocate(., `kgCO2e per unit`, .after = Unit)
-                     }
+                     
                      colnames(tmpData) <- colnames(DF_trans)
                      tmpData$Comments <- as.character(tmpData$Comments)
                      tmpData$Unit <- as.character(tmpData$Unit)

@@ -311,10 +311,13 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_mpfuTbl")]] # id
-                   if ("kgCO2e per unit" %notin% names(tmpData)) {
-                     tmpData$`kgCO2e per unit` <- 0.0
-                     tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                   
                    colnames(tmpData) <- colnames(DF_mpfueluse)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)
                    tmpData$Unit <- as.character(tmpData$Unit)
