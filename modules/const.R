@@ -1442,7 +1442,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         selected = constr_alt_values$data[input$constrAltTbl_rows_selected,2]),
                          numericInput(ns("constrAlt_mod_col3"), label = "Total Fuel Use", value = constr_alt_values$data[input$constrAltTbl_rows_selected,3]),
                          uiOutput(ns("constrAlt_mod_col4_out")),
-                         textInput(ns("constrAlt_mod_col5"), label = "Comments", value = constr_alt_values$data[input$constrAltTbl_rows_selected,6]),
+                         textInput(ns("constrAlt_mod_col5"), label = "Comments", value = constr_alt_values$data[input$constrAltTbl_rows_selected,7]),
                          
                          hidden(numericInput(ns("constrAlt_mod_rown"), value = input$constrAltTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("constrAlt_confirm_mod"),"Confirm"),
@@ -1632,7 +1632,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                          selectizeInput(ns("wuconstr_mod_col2"), label = "Water Use", choices = c("Water Use - UK Average")),
                          numericInput(ns("wuconstr_mod_col3"), label = "Quantity", value = wuconstrvalues$data[input$wuconstrTbl_rows_selected,3]),
                          selectizeInput(ns("wuconstr_mod_col4"), label = "Unit", choices = c("litres")),
-                         textInput(ns("wuconstr_mod_col5"), label = "Comments", value = wuconstrvalues$data[input$wuconstrTbl_rows_selected, 6]),
+                         textInput(ns("wuconstr_mod_col5"), label = "Comments", value = wuconstrvalues$data[input$wuconstrTbl_rows_selected, 7]),
 
                          hidden(numericInput(ns("wuconstr_mod_rown"), value = input$wuconstrTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("wuconstr_confirm_mod"),"Confirm"),

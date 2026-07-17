@@ -1334,7 +1334,8 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                        templateIn$`Annual Distance` <- as.numeric(templateIn$`Annual Distance`)
                      }
                      
-                     templateIn_data <- bind_rows(operwastevalues$data %>% dplyr::select(-`kgCO2e per unit`), templateIn) %>%
+                     templateIn_data <- bind_rows(operwastevalues$data %>% dplyr::select(-`kgCO2e per unit waste`, -`kgCO2e per unit trans`),
+                                                  templateIn) %>%
                        dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                         by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
                        dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%

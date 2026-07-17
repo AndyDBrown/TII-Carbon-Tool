@@ -868,7 +868,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        templateIn$Distance <- as.numeric(templateIn$Distance)
                      }
                      
-                     templateIn_data <- bind_rows(wasvalues$data %>% dplyr::select(-`kgCO2e per unit`), templateIn) %>%
+                     templateIn_data <- bind_rows(wasvalues$data %>% dplyr::select(-`kgCO2e per unit waste`, -`kgCO2e per unit trans`),
+                                                  templateIn) %>%
                        dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                         by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
                        dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
@@ -878,7 +879,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
                        dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
                        dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
-                       dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
+                       dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`) %>%
                        #dplyr::select(., -`kgCO2e per unit`) %>%
                        dplyr::filter(`Quantity` > 0)
                      
