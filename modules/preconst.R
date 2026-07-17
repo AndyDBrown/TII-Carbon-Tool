@@ -334,7 +334,8 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
                    clearancevalues_withEFs <- tmpData %>%
                      dplyr::left_join(., efs$Activity_Road[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Activity Emissions tCO2e` = Quantity * `kgCO2e per unit` * kgConversion)
                    preconst_returned$cadaTblResave = clearancevalues_withEFs
 
                    sum_cada_tCO2$data <- sum(na.omit(tmpData$`Activity Emissions tCO2e`)) # get total carbon emissions
@@ -352,7 +353,8 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
                    lucavlvalues_withEFs <- tmpData %>%
                      dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("Vegetation Type" = "Carbon Sink")) %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Carbon Sink tCO2e (removed)` = Quantity * `kgCO2e per unit` * kgConversion)
                    preconst_returned$lucavlTblResave = lucavlvalues_withEFs
 
                    sum_lucavl_tCO2$data <- sum(na.omit(tmpData$`Carbon Sink tCO2e`)) # get total carbon emissions
@@ -370,7 +372,8 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
                    wudcdavalues_withEFs <- tmpData %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Activity tCO2e` = Quantity * `kgCO2e per unit` * kgConversion)
                    preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
 
                    sum_wudcda_tCO2$data = sum(na.omit(tmpData$`Activity tCO2e`)) # get total carbon emissions

@@ -61,7 +61,7 @@ ReleaseDate12 <- "March 2026"
 Issue12 <- "Units issue with a small number of Embodied Carbon EFs."
 Change12 <- "EF library Updated"
 
-ToolVersion13 <- "Version 0.9.2"
+ToolVersion13 <- "Version 1.0.0"
 ReleaseDate13 <- "July 2026"
 Issue13 <- "Major update of EF library and additional Excel QA spreadsheet export functionality."
 Change13 <- "Update of EF library to include Ireland-specific pavement/concrete EFs, GGBS and energy-related factors, additional Excel QA spreadsheet export functionality."

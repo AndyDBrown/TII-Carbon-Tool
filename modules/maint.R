@@ -316,8 +316,9 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                    }
                    tmpData <- tmpData %>% 
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
-                   
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Annual Emissions tCO2e` = `Annual Quantity` * `kgCO2e per unit` * kgConversion)
+                     
                    colnames(tmpData) <- colnames(DF_mpfueluse)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)
                    tmpData$Unit <- as.character(tmpData$Unit)

@@ -324,7 +324,8 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                    }
                      tmpData <- tmpData %>% 
                        dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
-                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                       dplyr::mutate(`Annual Emissions tCO2e` = `Annual Consumption` * `kgCO2e per unit` * kgConversion)
                    
                    colnames(tmpData) <- colnames(DF_train)
                    trainvalues$data <- tmpData

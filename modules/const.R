@@ -681,7 +681,8 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    }
                      tmpData <- tmpData %>%
                        dplyr::left_join(., dropdown_options_excavTbl[, c("Activity","kgCO2e per unit")], by = "Activity") %>%
-                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                       dplyr::mutate(`Activity tCO2e` = Quantity * `kgCO2e per unit` * kgConversion)
                    
                    colnames(tmpData) <- colnames(DF_excavTbl)
                    tmpData$Comments <- as.character(tmpData$Comments)
@@ -696,10 +697,13 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    if ("kgCO2e per unit" %in% names(tmpData)) {
                      tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   cat("constr before ", tmpData$`Activity tCO2e`,"\n")
                      tmpData <- tmpData %>%
                        dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
-                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
-                   
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                       dplyr::mutate(`Activity tCO2e` = `Fuel Use Per Hour` * `Operating Time (Hours Per Day)` * `Total Days` *
+                                     `kgCO2e per unit` * kgConversion)
+                     cat("constr after ", tmpData$`Activity tCO2e`,"\n")
                    colnames(tmpData) <- colnames(DF_constrTbl)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -716,7 +720,8 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                      }
                      tmpData2 <- tmpData2 %>% 
                        dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Energy Type" = "Fuel")) %>%
-                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")  
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                       dplyr::mutate(`Activity tCO2e` = `Total Fuel Use` * `kgCO2e per unit` * kgConversion)
                      
                      colnames(tmpData2) <- colnames(DF_constrTbl_alt)
                      tmpData2$Comments <- as.character(tmpData2$Comments)
@@ -732,13 +737,17 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    rm(tmpData2)
                    
                    
+                   #if (id == "constro1"){browser()}
                    tmpData <- appR_returned$data[[paste0(id,"_wuconstrTbl")]]
                    if ("kgCO2e per unit" %in% names(tmpData)) {
                      tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   cat("wuconstr before ", tmpData$`Activity tCO2e`,"\n")
                    tmpData <- tmpData %>% 
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Activity tCO2e` = Quantity * `kgCO2e per unit` * kgConversion)
+                   cat("wuconstr after ", tmpData$`Activity tCO2e`,"\n")
                    
                    if (ncol(tmpData)==6){tmpData$Comments <- as.character(NA)}
                    colnames(tmpData) <- colnames(DF_wuconstrTbl)
@@ -771,7 +780,8 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    }
                    tmpData <- tmpData %>% 
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Mode of Transport" = "Vehicle")) %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Total distance travelled by workers during construction (km)")
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Total distance travelled by workers during construction (km)") %>%
+                     dplyr::mutate(`Transport tCO2e` = `Total distance travelled by workers during construction (km)` * `kgCO2e per unit` * kgConversion)
                    
                    colnames(tmpData) <- colnames(DF_worktravelconstrTbl)
                    tmpData$`Comments` <- as.character(tmpData$`Comments`)
@@ -803,11 +813,11 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
-                     #dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
-                     #dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
                    
                    colnames(tmpData) <- colnames(DF_constrwaste)

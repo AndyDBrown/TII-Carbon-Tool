@@ -321,11 +321,11 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
-                     #dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
-                     #dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
                    
                    colnames(tmpData) <- colnames(DF_was)
@@ -347,7 +347,9 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    }
                    tmpData <- tmpData %>% 
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
-                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Activity tCO2e` = `Fuel Use per hour` * `hours per day` * `total days` *
+                                     `kgCO2e per unit` * kgConversion)
                    
                    colnames(tmpData) <- colnames(DF_decon)
                    tmpData$Comments <- as.character(tmpData$Comments)
