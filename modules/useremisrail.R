@@ -395,7 +395,7 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                    
                    new_row = data.frame(input$vehu_add_col1,
                                         input$vehu_add_col2,
-                                        "Difference DS-DM Scenarios (tCO2e)" = 0,
+                                        "Difference.DS.DM.Scenarios..tCO2e." = 0,
                                         input$vehu_add_col3) %>%
                      dplyr::mutate(`Difference.DS.DM.Scenarios..tCO2e.` = input.vehu_add_col2 - input.vehu_add_col1)
                    
@@ -471,8 +471,8 @@ useremisrail_server <- function(id, option_number, thetitle, theoutput, appR_ret
                                         input$train_add_col2,
                                         input$train_add_col3,
                                         input$train_add_col4,
-                                        "Annual Emissions tCO2e" = 0,
-                                        "Total emissions from train operation for project lifetime" = 0) %>%
+                                        "Annual.Emissions.tCO2e" = 0,
+                                        "Total.emissions.from.train.operation.for.project.lifetime" = 0) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.train_add_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.train_add_col4") %>%
                      dplyr::mutate(`Annual.Emissions.tCO2e` = input.train_add_col3 * `kgCO2e per unit` * kgConversion) %>%

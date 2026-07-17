@@ -755,7 +755,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                                         input$oeu_add_col2,
                                         input$oeu_add_col3,
                                         input$oeu_add_col4,
-                                        "Annual Emissions tCO2e" = 0,
+                                        "Annual.Emissions.tCO2e" = 0,
                                         input$oeu_add_col5) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.oeu_add_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.oeu_add_col4") %>%
@@ -861,7 +861,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                                         input$oeu_mod_col2,
                                         input$oeu_mod_col3,
                                         input$oeu_mod_col4,
-                                        "Annual Emissions tCO2e" = 0,
+                                        "Annual.Emissions.tCO2e" = 0,
                                         input$oeu_mod_col5) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.oeu_mod_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.oeu_mod_col4") %>%
@@ -946,7 +946,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                    new_row = data.frame(input$owu_add_col1,
                                         input$owu_add_col2,
                                         input$owu_add_col3,
-                                        "Annual Emissions tCO2e" = 0,
+                                        "Annual.Emissions.tCO2e" = 0,
                                         input$owu_add_col4) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.owu_add_col1" = "Water")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.owu_add_col3") %>% 
@@ -1022,7 +1022,7 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                    new_row = data.frame(input$owu_mod_col1,
                                         input$owu_mod_col2,
                                         input$owu_mod_col3,
-                                        "Annual Emissions tCO2e" = 0,
+                                        "Annual.Emissions.tCO2e" = 0,
                                         input$owu_mod_col4) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.owu_mod_col1" = "Water")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.owu_mod_col3") %>% 
@@ -1114,8 +1114,8 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                                         input$operwaste_add_col5,
                                         input$operwaste_add_col6,
                                         input$operwaste_add_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$operwaste_add_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.operwaste_add_col1"="Waste Type", "input.operwaste_add_col2"="Waste Route")) %>%
@@ -1287,8 +1287,8 @@ use_server <- function(id, option_number, thetitle, theoutput, appR_returned, pr
                                         input$operwaste_mod_col5,
                                         input$operwaste_mod_col6,
                                         input$operwaste_mod_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$operwaste_mod_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.operwaste_mod_col1"="Waste Type", "input.operwaste_mod_col2"="Waste Route")) %>%

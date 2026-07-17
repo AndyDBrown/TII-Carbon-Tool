@@ -455,7 +455,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                         input$cada_add_col3,
                                         input$cada_add_col4,
                                         input$cada_add_col5,
-                                        "Activity Emissions tCO2e" = 0,
+                                        "Activity.Emissions.tCO2e" = 0,
                                         input$cada_add_col6) %>%
                      dplyr::left_join(., efs$Activity_Road, by = c("input.cada_add_col3" = "Activity")) %>%
                      dplyr::mutate(Activity.Emissions.tCO2e = input.cada_add_col4 * `kgCO2e per unit` * kgConversion) %>%
@@ -551,7 +551,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                         input$cada_add_col3,
                                         input$cada_add_col4,
                                         input$cada_add_col5,
-                                        "Activity Emissions tCO2e" = 0,
+                                        "Activity.Emissions.tCO2e" = 0,
                                         input$cada_add_col6) %>%
                      dplyr::left_join(., efs$Activity_Road, by = c("input.cada_add_col3" = "Activity")) %>%
                      dplyr::mutate(Activity.Emissions.tCO2e = input.cada_add_col4 * `kgCO2e per unit` * kgConversion) %>%
@@ -642,7 +642,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    new_row = data.frame(input$lucavl_add_col1,
                                         input$lucavl_add_col2,
                                         input$lucavl_add_col3,
-                                        "Carbon Sink tCO2e (removed)" = 0,
+                                        "Carbon.Sink.tCO2e..removed." = 0,
                                         input$lucavl_add_col4) %>%
                      dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("input.lucavl_add_col1" = "Carbon Sink")) %>%
                      dplyr::mutate(Carbon.Sink.tCO2e..removed. = input.lucavl_add_col2 * `kgCO2e per unit` * kgConversion) %>%
@@ -734,7 +734,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    new_row = data.frame(input$lucavl_add_col1,
                                         input$lucavl_add_col2,
                                         input$lucavl_add_col3,
-                                        "Carbon Sink tCO2e (removed)" = 0,
+                                        "Carbon.Sink.tCO2e..removed." = 0,
                                         input$lucavl_add_col4) %>%
                      dplyr::left_join(., efs$Carbon[, c("Carbon Sink","kgCO2e per unit")], by = c("input.lucavl_add_col1" = "Carbon Sink")) %>%
                      dplyr::mutate(Carbon.Sink.tCO2e..removed. = input.lucavl_add_col2 * `kgCO2e per unit` * kgConversion) %>%
@@ -827,7 +827,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                         input$wudcda_add_col2,
                                         input$wudcda_add_col3,
                                         input$wudcda_add_col4,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$wudcda_add_col5) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.wudcda_add_col2" = "Water")) %>%
                      dplyr::mutate(`Activity.tCO2e` = input.wudcda_add_col3 * `kgCO2e per unit` * kgConversion) %>%
@@ -919,7 +919,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                                         input$wudcda_add_col2,
                                         input$wudcda_add_col3,
                                         input$wudcda_add_col4,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$wudcda_add_col5) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.wudcda_add_col2" = "Water")) %>%
                      dplyr::mutate(`Activity.tCO2e` = input.wudcda_add_col3 * `kgCO2e per unit` * kgConversion) %>%

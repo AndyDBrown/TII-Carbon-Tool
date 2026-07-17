@@ -430,7 +430,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$decon_add_col4,
                                         input$decon_add_col5,
                                         input$decon_add_col6,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$decon_add_col7) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.decon_add_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.decon_add_col4") %>%
@@ -541,7 +541,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$decon_mod_col4,
                                         input$decon_mod_col5,
                                         input$decon_mod_col6,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$decon_mod_col7) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.decon_mod_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.decon_mod_col4") %>%
@@ -639,8 +639,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$wasMan_add_col5,
                                         input$wasMan_add_col6,
                                         input$wasMan_add_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$wasMan_add_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.wasMan_add_col1"="Waste Type", "input.wasMan_add_col2"="Waste Route")) %>%
@@ -816,8 +816,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$wasMan_mod_col5,
                                         input$wasMan_mod_col6,
                                         input$wasMan_mod_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$wasMan_mod_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.wasMan_mod_col1"="Waste Type", "input.wasMan_mod_col2"="Waste Route")) %>%

@@ -1322,7 +1322,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                    new_row = data.frame(input$trans_add_col1,
                                         input$trans_add_col2,
                                         input$trans_add_col3,
-                                        "Transport tCO2e" = 0, #output$trans_add_col4_out,
+                                        "Transport.tCO2e" = 0, #output$trans_add_col4_out,
                                         input$trans_add_col5) %>%
                      dplyr::left_join(., trans_mode_options, by = c("input.trans_add_col1" = "Vehicle")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .before = Transport.tCO2e) %>%
@@ -1403,7 +1403,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                    new_row = data.frame(input$trans_add_col1,
                                         input$trans_add_col2,
                                         input$trans_add_col3,
-                                        "Transport tCO2e" = 0, #output$trans_add_col4_out,
+                                        "Transport.tCO2e" = 0, #output$trans_add_col4_out,
                                         input$trans_add_col5) %>%
                      dplyr::left_join(., trans_mode_options, by = c("input.trans_add_col1" = "Vehicle")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .before = Transport.tCO2e) %>%

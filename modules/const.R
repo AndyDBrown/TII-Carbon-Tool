@@ -934,7 +934,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$excav_add_col4,
                                         input$excav_add_col5,
                                         #"kgCO2e per unit" = 0,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$excav_add_col6) %>%
                      dplyr::left_join(., dropdown_options_excavTbl[, c("Activity","kgCO2e per unit")],
                                       by = c("input.excav_add_col3"="Activity")) %>%
@@ -1055,7 +1055,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$excav_mod_col4,
                                         input$excav_mod_col5,
                                         #"kgCO2e per unit" = 0,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$excav_mod_col6) %>%
                      dplyr::left_join(., dropdown_options_excavTbl[, c("Activity","kgCO2e per unit")],
                                       by = c("input.excav_mod_col3"="Activity")) %>%
@@ -1146,7 +1146,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$constr_add_col4,
                                         input$constr_add_col5,
                                         input$constr_add_col6,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$constr_add_col7) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.constr_add_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.constr_add_col4") %>%
@@ -1264,7 +1264,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$constr_mod_col4,
                                         input$constr_mod_col5,
                                         input$constr_mod_col6,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$constr_mod_col7) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.constr_mod_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.constr_mod_col4") %>%
@@ -1361,7 +1361,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$constrAlt_add_col2,
                                         input$constrAlt_add_col3,
                                         input$constrAlt_add_col4,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$constrAlt_add_col5) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.constrAlt_add_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.constrAlt_add_col4") %>%
@@ -1474,7 +1474,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$constrAlt_mod_col2,
                                         input$constrAlt_mod_col3,
                                         input$constrAlt_mod_col4,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$constrAlt_mod_col5) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.constrAlt_mod_col2" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.constrAlt_mod_col4") %>%
@@ -1567,7 +1567,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$wuconstr_add_col2,
                                         input$wuconstr_add_col3,
                                         input$wuconstr_add_col4,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$wuconstr_add_col5
                                         ) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.wuconstr_add_col2" = "Water")) %>%
@@ -1652,7 +1652,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$wuconstr_mod_col2,
                                         input$wuconstr_mod_col3,
                                         input$wuconstr_mod_col4,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$wuconstr_mod_col5
                                         ) %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("input.wuconstr_mod_col2" = "Water")) %>%
@@ -1736,7 +1736,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    #browser()
                    new_row = data.frame(input$wtconstr_add_col1,
                                         input$wtconstr_add_col2,
-                                        "Transport tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$wtconstr_add_col3) %>%
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("input.wtconstr_add_col1" = "Vehicle")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.wtconstr_add_col2") %>% 
@@ -1817,7 +1817,7 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    #browser()
                    new_row = data.frame(input$wtconstr_mod_col1,
                                         input$wtconstr_mod_col2,
-                                        "Transport tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$wtconstr_mod_col3) %>%
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("input.wtconstr_mod_col1" = "Vehicle")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.wtconstr_mod_col2") %>% 
@@ -1910,8 +1910,8 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$constrwaste_add_col5,
                                         input$constrwaste_add_col6,
                                         input$constrwaste_add_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$constrwaste_add_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.constrwaste_add_col1"="Waste Type", "input.constrwaste_add_col2"="Waste Route")) %>%
@@ -2080,8 +2080,8 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                                         input$constrwaste_mod_col5,
                                         input$constrwaste_mod_col6,
                                         input$constrwaste_mod_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$constrwaste_mod_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.constrwaste_mod_col1"="Waste Type", "input.constrwaste_mod_col2"="Waste Route")) %>%

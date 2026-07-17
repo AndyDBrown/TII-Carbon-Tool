@@ -407,7 +407,7 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                    new_row = data.frame(input$mpfu_add_col1,
                                         input$mpfu_add_col2,
                                         input$mpfu_add_col3,
-                                        "Annual Emissions tCO2e" = 0,
+                                        "Annual.Emissions.tCO2e" = 0,
                                         input$mpfu_add_col4) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.mpfu_add_col1" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.mpfu_add_col3") %>%
@@ -499,7 +499,7 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                    new_row = data.frame(input$mpfu_mod_col1,
                                         input$mpfu_mod_col2,
                                         input$mpfu_mod_col3,
-                                        "Annual Emissions tCO2e" = 0,
+                                        "Annual.Emissions.tCO2e" = 0,
                                         input$mpfu_mod_col4) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.mpfu_mod_col1" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "input.mpfu_mod_col3") %>%
