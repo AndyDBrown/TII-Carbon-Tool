@@ -790,18 +790,6 @@ const_server <- function(id, option_number, thetitle, theoutput, appR_returned){
                    
                    sum_wtcv_tCO2$data = sum(na.omit(as.numeric(tmpData$`Transport tCO2e`))) # get carbon emissions
                    
-                   
-                   
-                   # tmpData <- appR_returned$data[[paste0(id,"_landvegconstrTbl")]]
-                   # colnames(tmpData) <- colnames(DF_landvegconstrTbl)
-                   # tmpData$Unit <- as.character(tmpData$Unit)
-                   # tmpData$`Comments` <- as.character(tmpData$`Comments`)
-                   # landvegconstrvalues$data <- tmpData
-                   # const_returned$landvegconstrTblResave = tmpData
-                   # 
-                   # sum_landv_tCO2$data = sum(na.omit(as.numeric(tmpData$`Carbon Sink tCO2e (added)`))) * -1.0 # get carbon emissions
-                   
-                   
                    tmpData <- appR_returned$data[[paste0(id,"_constrwasteTbl")]]
                    if ("kgCO2e per unit waste" %in% names(tmpData)) {
                      tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit waste`)

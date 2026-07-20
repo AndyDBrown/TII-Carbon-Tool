@@ -345,6 +345,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    if ("kgCO2e per unit" %in% names(tmpData)) {
                      tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
                    }
+                   #browser()
                    tmpData <- tmpData %>% 
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%

@@ -320,7 +320,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                      print("LOAD DATA IS NULL")
                    } else {
                      
-                   
+                   #if (id == "preconstro1"){browser()}
                    # Load data from the load file into rhandsontables and reactivevalues
                    tmpData <- appR_returned$data[[paste0(id,"_cadaTbl")]]
                    if ("kgCO2e per unit" %in% names(tmpData)) {
@@ -329,7 +329,6 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    colnames(tmpData) <- colnames(DF_clearance)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
-                   clearancevalues$data <- tmpData
                    
                    # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
                    clearancevalues_withEFs <- tmpData %>%
@@ -337,9 +336,11 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
                      dplyr::mutate(`Activity Emissions tCO2e` = Quantity * `kgCO2e per unit` * kgConversion)
                    preconst_returned$cadaTblResave = clearancevalues_withEFs
+                   clearancevalues$data <- clearancevalues_withEFs %>% 
+                     dplyr::select(., -`kgCO2e per unit`)
 
-                   sum_cada_tCO2$data <- sum(na.omit(tmpData$`Activity Emissions tCO2e`)) # get total carbon emissions
-                   
+                   #sum_cada_tCO2$data <- sum(na.omit(tmpData$`Activity Emissions tCO2e`)) # get total carbon emissions
+                   sum_cada_tCO2$data <- sum(na.omit(clearancevalues_withEFs$`Activity Emissions tCO2e`))
                    
                    tmpData <- appR_returned$data[[paste0(id,"_lucavlTbl")]]
                    if ("kgCO2e per unit" %in% names(tmpData)) {
@@ -348,7 +349,6 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    colnames(tmpData) <- colnames(DF_lucavl)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
-                   lucavlvalues$data <- tmpData
                    
                    # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
                    lucavlvalues_withEFs <- tmpData %>%
@@ -356,9 +356,11 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
                      dplyr::mutate(`Carbon Sink tCO2e (removed)` = Quantity * `kgCO2e per unit` * kgConversion)
                    preconst_returned$lucavlTblResave = lucavlvalues_withEFs
+                   lucavlvalues$data <- lucavlvalues_withEFs %>% 
+                     dplyr::select(., -`kgCO2e per unit`)
 
-                   sum_lucavl_tCO2$data <- sum(na.omit(tmpData$`Carbon Sink tCO2e`)) # get total carbon emissions
-                   
+                   #sum_lucavl_tCO2$data <- sum(na.omit(tmpData$`Carbon Sink tCO2e`)) # get total carbon emissions
+                   sum_lucavl_tCO2$data <- sum(na.omit(lucavlvalues_withEFs$`Carbon Sink tCO2e`)) # get total carbon emissions
                    
                    tmpData <- appR_returned$data[[paste0(id,"_wudcdaTbl")]]
                    if ("kgCO2e per unit" %in% names(tmpData)) {
@@ -370,14 +372,18 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    wudcdavalues$data <- tmpData
                    
                    # re-join EFs to table specifically for exporting table to downloadable Excel QA workbook
+                   #if (id == "preconstro1"){browser()}
                    wudcdavalues_withEFs <- tmpData %>%
                      dplyr::left_join(., efs$Water[, c("Water","kgCO2e per unit")], by = c("Water Use" = "Water")) %>%
                      dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
                      dplyr::mutate(`Activity tCO2e` = Quantity * `kgCO2e per unit` * kgConversion)
-                   preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
-
-                   sum_wudcda_tCO2$data = sum(na.omit(tmpData$`Activity tCO2e`)) # get total carbon emissions
                    
+                   preconst_returned$wudcdaTblResave = wudcdavalues_withEFs
+                   wudcdavalues$data <- wudcdavalues_withEFs %>%
+                     dplyr::select(., -`kgCO2e per unit`)
+
+                   #sum_wudcda_tCO2$data = sum(na.omit(tmpData$`Activity tCO2e`)) # get total carbon emissions
+                   sum_wudcda_tCO2$data = sum(na.omit(wudcdavalues_withEFs$`Activity tCO2e`)) # get total carbon emissions
                    
                    
                    sum_preconst_tCO2$data = sum(sum_cada_tCO2$data,
@@ -1195,6 +1201,8 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                
                )
   
-  return(preconst_returned)
+  return({
+    cat("Returning preconstr data \n")
+    preconst_returned})
   
 }
