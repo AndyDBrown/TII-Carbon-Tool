@@ -544,6 +544,9 @@ maint_server <- function(id, option_number, thetitle, theoutput, appR_returned, 
                      sum_mpfu_tCO2$data = sum(na.omit(mpfuvalues$data$`Annual Emissions tCO2e`)) * projectdetails_values$lifeTime # get annual carbon emissions
                      sum_maint_tCO2$data = sum(sum_mpfu_tCO2$data)
                      maint_returned$data$Value = c(sum_mpfu_tCO2$data, sum_maint_tCO2$data)
+                     
+                     ## add resave here
+                     maint_returned$mpfuTblResave = mpfuvalues$data
                    } else {
                      showModal(
                        modalDialog(
