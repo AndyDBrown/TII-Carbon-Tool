@@ -658,29 +658,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        colnames(tmpData) <- colnames(DF_rmec)
                        tmpData$Comments <- as.character(tmpData$Comments)
                        tmpData$Unit <- as.character(tmpData$Unit)
-                       #tmpData$`Distance Unit Mode 1` <- as.character(tmpData$`Distance Unit Mode 1`)
-                       #tmpData$`Distance Unit Mode 2` <- as.character(tmpData$`Distance Unit Mode 2`)
-                       #}
                        
-                       ## update EF with manual EFs from save file
-                       # if(stringr::str_detect(id, pattern = "ro[0-9]{1,2}$")){ # single assign so it doesn't leave the function
-                       #   dropdown_options_temp <- rbind(efs$Material_Road, appR_returned$data$efs_materialroad_userinput, use.names = T, fill = T) %>%
-                       #     select(Category, `Sub Category`, Material, Unit, `kgCO2e per unit`, `% replaced in 1 maintenance cycle`, `Regularity of maintenance cycle`) %>%
-                       #     unique(.) %>%
-                       #     as.data.table()
-                       # 
-                       # } else if(stringr::str_detect(id, pattern = "ra[0-9]{1,2}$")){
-                       #   dropdown_options_temp <- rbind(efs$Material_Rail, appR_returned$data$efs_materialrail_userinput, use.names = T, fill = T) %>%
-                       #     select(Category, `Sub Category`, Material, Unit, `kgCO2e per unit`, `% replaced in 1 maintenance cycle`, `Regularity of maintenance cycle`) %>%
-                       #     unique(.) %>%
-                       #     as.data.table()
-                       # 
-                       # } else if(stringr::str_detect(id, pattern = "gw[0-9]{1,2}$")){
-                       #   dropdown_options_temp <- rbind(efs$Material_Road, appR_returned$data$efs_materialroad_userinput, use.names = T, fill = T) %>%
-                       #     select(Category, `Sub Category`, Material, Unit, `kgCO2e per unit`, `% replaced in 1 maintenance cycle`, `Regularity of maintenance cycle`) %>%
-                       #     unique(.) %>%
-                       #     as.data.table()
-                       # }
                        
                        
                        if(stringr::str_detect(id, pattern = "ro[0-9]{1,2}$")){ # single assign so it doesn't leave the function
@@ -696,6 +674,27 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        #if (id == "embcarbonro1"){browser()}
                        ## Update emissions in table here - this is in case we get updated EF library#
                        projectLifetime <- as.numeric(appR_returned$data$inputs_data_frame$Value[8])
+                       
+                       # identify if any entries need patching over to the new EFs by joining to table
+                       #if (id == "embcarbonro1"){browser()}
+                       cat_subcat_changes1 <- dplyr::left_join(tmpData, efs_patch$Cat_SubCat, by = c("Category", "Sub Category", "Material")) %>%
+                         dplyr::left_join(., efs_patch$Material, by = c("Category", "Sub Category", "Material"))
+                       
+                       cat_subcat_changes1 <- cat_subcat_changes1 %>%
+                         # replace the old cat/sub cat with the new only for those entries that matched, and then same for the material
+                         dplyr::mutate(Category = if_else(!is.na(`Category-NEW`), `Category-NEW`, Category)) %>%
+                         dplyr::mutate(`Sub Category` = if_else(!is.na(`Sub Category-NEW`), `Sub Category-NEW`, `Sub Category`)) %>%
+                         dplyr::mutate(Material = if_else(!is.na(`Material-NEW`), `Material-NEW`, Material))
+                       
+                       tmpData <- cat_subcat_changes1 %>% dplyr::select(-`Category-NEW`, -`Sub Category-NEW`, -`Material-NEW`)
+                       #cat_subcat_changes <- dplyr::inner_join(tmpData, efs_patch$Cat_SubCat, by = c("Category", "Sub Category", "Material"))
+                       #tmpData_remainder <- dplyr::anti_join(tmpData, efs_patch$Cat_SubCat, by = c("Category", "Sub Category", "Material"))
+                       # replace the old cat/sub cat with the new
+                       #cat_subcat_changes <- cat_subcat_changes %>%
+                       #  dplyr::mutate(Category = `Category-NEW`, `Sub Category` = `Sub Category-NEW`) %>%
+                       #  dplyr::select(-`Category-NEW`, `Sub Category-NEW`)
+                       
+                       #tmpData_recalc <- left_join(tmpData,dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
                        tmpData_recalc <- left_join(tmpData %>% dplyr::select(-`kgCO2e per unit`), dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
                        # tmpData_recalc <- left_join(tmpData,efs_react$data$Material_Road, by = c("Category", "Sub Category", "Material", "Unit")) # need to add in a line before this to add manual EFs to dropdown options! Done see prev line
                        tmpData_recalc$`Embodied tCO2e` = tmpData_recalc$Quantity *  tmpData_recalc$`kgCO2e per unit` * kgConversion
@@ -707,6 +706,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        tmpData = tmpData_recalc[,1:ncol(tmpData)] %>%
                          dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
                        ### End
+                       
                        
                        rmecvalues$data = tmpData
                        embcarbon_returned$rmecTblResave = tmpData

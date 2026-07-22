@@ -1202,7 +1202,7 @@ preconst_server <- function(id, option_number, thetitle, theoutput, appR_returne
                )
   
   return({
-    cat("Returning preconstr data \n")
+    #cat("Returning preconstr data \n")
     preconst_returned})
   
 }
