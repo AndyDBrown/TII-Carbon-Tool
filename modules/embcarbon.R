@@ -694,7 +694,6 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        #  dplyr::mutate(Category = `Category-NEW`, `Sub Category` = `Sub Category-NEW`) %>%
                        #  dplyr::select(-`Category-NEW`, `Sub Category-NEW`)
                        
-                       
                        #tmpData_recalc <- left_join(tmpData,dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
                        tmpData_recalc <- left_join(tmpData %>% dplyr::select(-`kgCO2e per unit`), dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
                        # tmpData_recalc <- left_join(tmpData,efs_react$data$Material_Road, by = c("Category", "Sub Category", "Material", "Unit")) # need to add in a line before this to add manual EFs to dropdown options! Done see prev line
