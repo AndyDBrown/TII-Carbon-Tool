@@ -330,7 +330,7 @@ useremis_server <- function(id, option_number, thetitle, theoutput, appR_returne
                    
                    new_row = data.frame(input$vehu_add_col1,
                                         input$vehu_add_col2,
-                                        "Difference DS-DM Scenarios (tCO2e)" = 0,
+                                        "Difference.DS.DM.Scenarios..tCO2e." = 0,
                                         input$vehu_add_col3) %>%
                      dplyr::mutate(`Difference.DS.DM.Scenarios..tCO2e.` = input.vehu_add_col2 - input.vehu_add_col1)
                    

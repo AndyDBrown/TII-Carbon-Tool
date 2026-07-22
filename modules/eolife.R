@@ -207,6 +207,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        `Fuel Type` = as.character(NA),
                        `Fuel Use per hour` = 0.0,
                        Unit = as.character(NA),
+                       `kgCO2e per unit` = 0.0,
                        `hours per day` = 0.0,
                        `total days` = 0.0,
                        `Activity tCO2e` = 0.0,
@@ -218,9 +219,11 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                       `Waste Route` = as.character(NA),
                       Quantity = 0.0,
                       Unit = as.character(NA),
+                      `kgCO2e per unit waste` = 0.0,
                       `Transport Mode` = as.character(NA),
                       Distance = 0.0,
                       `Distance Unit` = as.character(NA),
+                      `kgCO2e per unit trans` = 0.0,
                       `Waste Processing Carbon tCO2e` = 0.0,
                       `Transport tCO2e` = 0.0,
                       Comments = as.character(NA),
@@ -308,6 +311,23 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    # Load data from the load file into rhandsontables and reactivevalues
                    tmpData <- appR_returned$data[[paste0(id,"_wasManTbl")]]
+                   if ("kgCO2e per unit waste" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit waste`)
+                   }
+                   if ("kgCO2e per unit trans" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit trans`)
+                   }
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
+                                      by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
+                     dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
+                     dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
+                     dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
+                   
                    colnames(tmpData) <- colnames(DF_was)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -322,6 +342,16 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    
                    tmpData <- appR_returned$data[[paste0(id,"_deconTbl")]]
+                   if ("kgCO2e per unit" %in% names(tmpData)) {
+                     tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
+                   }
+                   #browser()
+                   tmpData <- tmpData %>% 
+                     dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
+                     dplyr::mutate(`Activity tCO2e` = `Fuel Use per hour` * `hours per day` * `total days` *
+                                     `kgCO2e per unit` * kgConversion)
+                   
                    colnames(tmpData) <- colnames(DF_decon)
                    tmpData$Comments <- as.character(tmpData$Comments)
                    tmpData$Unit <- as.character(tmpData$Unit)
@@ -373,7 +403,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  # Decommissioning Activities/energy use table - change to datatables ----
                  output$deconTbl <- DT::renderDT({
                    DT = deconvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(8), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -403,12 +433,13 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$decon_add_col4,
                                         input$decon_add_col5,
                                         input$decon_add_col6,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$decon_add_col7) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.decon_add_col2" = "Fuel")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.decon_add_col4") %>%
                      dplyr::mutate(`Activity.tCO2e` = input.decon_add_col3 * input.decon_add_col5 * input.decon_add_col6 *
-                                     `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                                     `kgCO2e per unit` * kgConversion) #%>%
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    deconvalues$data <- data.table(rbind(deconvalues$data, new_row, use.names = F))
                    
@@ -477,9 +508,9 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                          selectizeInput(ns("decon_mod_col2"), label = "Energy Type", choices = use_oeu_energytype_dropdown),
                          numericInput(ns("decon_mod_col3"), label = "Fuel Use Per Hour", value = deconvalues$data[input$deconTbl_rows_selected,4]),
                          uiOutput(ns("decon_mod_col4_out")),
-                         numericInput(ns("decon_mod_col5"), label = "Operating Time (Hours Per Day)", value = deconvalues$data[input$deconTbl_rows_selected,6]),
-                         numericInput(ns("decon_mod_col6"), label = "Total Days", value = deconvalues$data[input$deconTbl_rows_selected,7]),
-                         textInput(ns("decon_mod_col7"), label = "Comments", value = deconvalues$data[input$deconTbl_rows_selected,9]),
+                         numericInput(ns("decon_mod_col5"), label = "Operating Time (Hours Per Day)", value = deconvalues$data[input$deconTbl_rows_selected,7]),
+                         numericInput(ns("decon_mod_col6"), label = "Total Days", value = deconvalues$data[input$deconTbl_rows_selected,8]),
+                         textInput(ns("decon_mod_col7"), label = "Comments", value = deconvalues$data[input$deconTbl_rows_selected,10]),
                          
                          hidden(numericInput(ns("decon_mod_rown"), value = input$deconTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("decon_confirm_mod"),"Confirm"),
@@ -513,12 +544,13 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$decon_mod_col4,
                                         input$decon_mod_col5,
                                         input$decon_mod_col6,
-                                        "Activity tCO2e" = 0,
+                                        "Activity.tCO2e" = 0,
                                         input$decon_mod_col7) %>%
                      dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("input.decon_mod_col2" = "Fuel")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.decon_mod_col4") %>%
                      dplyr::mutate(`Activity.tCO2e` = input.decon_mod_col3 * input.decon_mod_col5 * input.decon_mod_col6 *
-                                     `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                                     `kgCO2e per unit` * kgConversion) #%>%
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    deconvalues$data[input$decon_mod_rown,] <- new_row
                    
@@ -550,11 +582,12 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        templateIn$`total days` <- as.numeric(templateIn$`total days`)
                      }
                      
-                     templateIn_data <- bind_rows(deconvalues$data, templateIn) %>%
+                     templateIn_data <- bind_rows(deconvalues$data %>% dplyr::select(-`kgCO2e per unit`), templateIn) %>%
                        dplyr::left_join(., efs$Fuel[, c("Fuel","kgCO2e per unit")], by = c("Fuel Type" = "Fuel")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
                        dplyr::mutate(`Activity tCO2e` = `Fuel Use per hour` * `hours per day` * `total days`
                                      * `kgCO2e per unit` * kgConversion) %>%
-                       dplyr::select(., -`kgCO2e per unit`) %>%
+                       #dplyr::select(., -`kgCO2e per unit`) %>%
                        dplyr::filter(`Fuel Use per hour` > 0)
                      
                      deconvalues$data <- templateIn_data
@@ -578,7 +611,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  # Decommissioning Waste table - change to datatables ----
                  output$wasManTbl <- DT::renderDT({
                    DT = wasvalues$data
-                   datatable(DT, #selection = 'single',
+                   datatable(DT %>% dplyr::select(-`kgCO2e per unit waste`, -`kgCO2e per unit trans`), #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(8,9), currency = "", interval = 3, mark = ",", digits = 3)
                  })
@@ -609,16 +642,20 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$wasMan_add_col5,
                                         input$wasMan_add_col6,
                                         input$wasMan_add_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$wasMan_add_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.wasMan_add_col1"="Waste Type", "input.wasMan_add_col2"="Waste Route")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.wasMan_add_col4") %>%
                      dplyr::mutate(`Waste.Processing.Carbon.tCO2e` = input.wasMan_add_col3 * `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`) %>%
+                     dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
+                     #dplyr::select(., -`kgCO2e per unit`) %>%
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("input.wasMan_add_col5"="Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.wasMan_add_col7") %>%
                      dplyr::mutate(`Transport.tCO2e` = input.wasMan_add_col6 * `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                     dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    wasvalues$data <- data.table(rbind(wasvalues$data, new_row, use.names = F))
                    
@@ -651,6 +688,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  wasMan_unit_choices <- reactive({
+                   req(input$wasMan_add_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$wasMan_add_col1) %>%
                      filter(`Waste Route` == input$wasMan_add_col2) %>%
@@ -712,14 +750,16 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        modalDialog(
                          title = "Modify Row",
                          
-                         selectizeInput(ns("wasMan_mod_col1"), label = "Waste Type", choices = eolife_wasMan_wasType_dropdown),
+                         selectizeInput(ns("wasMan_mod_col1"), label = "Waste Type", choices = eolife_wasMan_wasType_dropdown,
+                                        selected = wasvalues$data[input$wasManTbl_rows_selected,1]),
                          uiOutput(ns("wasMan_mod_col2_out")),
                          numericInput(ns("wasMan_mod_col3"), label = "Quantity", value = wasvalues$data[input$wasManTbl_rows_selected,3]),
                          uiOutput(ns("wasMan_mod_col4_out")),
-                         selectizeInput(ns("wasMan_mod_col5"), label = "Transport Mode", choices = transmodewasteTbl_dropdown_opts_road$Vehicle),
-                         numericInput(ns("wasMan_mod_col6"), label = "Distance", value = wasvalues$data[input$wasManTbl_rows_selected,6]),
+                         selectizeInput(ns("wasMan_mod_col5"), label = "Transport Mode", choices = transmodewasteTbl_dropdown_opts_road$Vehicle,
+                                        selected = wasvalues$data[input$wasManTbl_rows_selected,6]),
+                         numericInput(ns("wasMan_mod_col6"), label = "Distance", value = wasvalues$data[input$wasManTbl_rows_selected,7]),
                          uiOutput(ns("wasMan_mod_col7_out")),
-                         textInput(ns("wasMan_mod_col8"), label = "Comments", value = wasvalues$data[input$wasManTbl_rows_selected,10]),
+                         textInput(ns("wasMan_mod_col8"), label = "Comments", value = wasvalues$data[input$wasManTbl_rows_selected,12]),
                          
                          hidden(numericInput(ns("wasMan_mod_rown"), value = input$wasManTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("wasMan_confirm_mod"),"Confirm"),
@@ -734,7 +774,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  output$wasMan_mod_col2_out <- renderUI({
-                   selectizeInput(ns("wasMan_mod_col2"), label = "Waste Route", choices = wasMan_wasteroute_choices_mod())
+                   selectizeInput(ns("wasMan_mod_col2"), label = "Waste Route", choices = wasMan_wasteroute_choices_mod(),
+                                  selected = wasvalues$data[input$wasManTbl_rows_selected,2])
                  })
                  
                  wasMan_wasteroute_choices_mod <- reactive({
@@ -749,6 +790,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  wasMan_unit_choices_mod <- reactive({
+                   req(input$wasMan_mod_col2)
                    unit_options <- efs$Waste %>% 
                      filter(`Waste Type` == input$wasMan_mod_col1) %>%
                      filter(`Waste Route` == input$wasMan_mod_col2) %>%
@@ -777,16 +819,20 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                                         input$wasMan_mod_col5,
                                         input$wasMan_mod_col6,
                                         input$wasMan_mod_col7,
-                                        "Waste Processing Carbon tCO2e" = 0,
-                                        "Transport tCO2e" = 0,
+                                        "Waste.Processing.Carbon.tCO2e" = 0,
+                                        "Transport.tCO2e" = 0,
                                         input$wasMan_mod_col8) %>%
                      dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                       by = c("input.wasMan_mod_col1"="Waste Type", "input.wasMan_mod_col2"="Waste Route")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.wasMan_mod_col4") %>%
                      dplyr::mutate(`Waste.Processing.Carbon.tCO2e` = input.wasMan_mod_col3 * `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`) %>%
+                     dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
+                     #dplyr::select(., -`kgCO2e per unit`) %>%
                      dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("input.wasMan_mod_col5"="Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .after = "input.wasMan_mod_col7") %>%
                      dplyr::mutate(`Transport.tCO2e` = input.wasMan_mod_col6 * `kgCO2e per unit` * kgConversion) %>%
-                     dplyr::select(., -`kgCO2e per unit`)
+                     dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`)
+                     #dplyr::select(., -`kgCO2e per unit`)
                    
                    wasvalues$data[input$wasMan_mod_rown,] <- new_row
 
@@ -825,14 +871,19 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                        templateIn$Distance <- as.numeric(templateIn$Distance)
                      }
                      
-                     templateIn_data <- bind_rows(wasvalues$data, templateIn) %>%
+                     templateIn_data <- bind_rows(wasvalues$data %>% dplyr::select(-`kgCO2e per unit waste`, -`kgCO2e per unit trans`),
+                                                  templateIn) %>%
                        dplyr::left_join(., efs$Waste[, c("Waste Type","Waste Route","kgCO2e per unit")],
                                         by = c("Waste Type"="Waste Type", "Waste Route"="Waste Route")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Unit") %>%
                        dplyr::mutate(`Waste Processing Carbon tCO2e` = Quantity * `kgCO2e per unit` * kgConversion) %>%
-                       dplyr::select(., -`kgCO2e per unit`) %>%
+                       dplyr::rename(`kgCO2e per unit waste` = `kgCO2e per unit`) %>%
+                       #dplyr::select(., -`kgCO2e per unit`) %>%
                        dplyr::left_join(., efs$Vehicle[, c("Vehicle","kgCO2e per unit")], by = c("Transport Mode"="Vehicle")) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = "Distance Unit") %>%
                        dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit` * kgConversion) %>%
-                       dplyr::select(., -`kgCO2e per unit`) %>%
+                       dplyr::rename(`kgCO2e per unit trans` = `kgCO2e per unit`) %>%
+                       #dplyr::select(., -`kgCO2e per unit`) %>%
                        dplyr::filter(`Quantity` > 0)
                      
                      wasvalues$data <- templateIn_data

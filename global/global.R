@@ -1033,6 +1033,101 @@ collatedTableLoadFiles <- rbind(RoadHomeTableLoadFiles, RailHomeTableLoadFiles, 
 
 
 
+excel_export_names <- data.table(
+  tbl_names = c(
+    'preconst_cada',
+    'preconst_lucavl',
+    'preconst_wudcda',
+    'embcarbon_rmec',
+    'embcarbon_trans',
+    'const_excav',
+    'const_constr',
+    'const_constrAlt',
+    'const_wuconstr',
+    'const_constrProjSize',
+    'const_worktravelconstr',
+    'const_constrwaste',
+    'use_oeu',
+    'use_owu',
+    'use_operwaste',
+    'use_landvegconstr',
+    'useremis_vehu',
+    'maint_mpfu',
+    'eolife_decon',
+    'eolife_wasMan'),
+  excel_tab_names = c(
+    'Pre-Con Clearance Dem',
+    'Pre-Con LU Change Veg Loss',
+    'Pre-Con Water Use',
+    'Emb Carbon Raw Materials',
+    'Emb Carbon Transport',
+    'Const Excavation',
+    'Const Activities (hourly fuel)',
+    'Const Activities (total fuel)',
+    'Const Water Use',
+    'Const Project Size',
+    'Const Worker Travel',
+    'Const Waste',
+    'Use Operational Energy',
+    'Use Operational Water',
+    'Use Operational Waste',
+    'Use Landscaping Veg',
+    'User Emis Vehicle Use',
+    'Maint Plant Fuel Use',
+    'End of Life Deconstruction',
+    'End of Life Waste')
+)
+
+
+
+
+excel_export_names_rail <- data.table(
+  tbl_names = c(
+    'preconst_cada',
+    'preconst_lucavl',
+    'preconst_wudcda',
+    'embcarbon_rmec',
+    'embcarbon_trans',
+    'const_excav',
+    'const_constr',
+    'const_constrAlt',
+    'const_wuconstr',
+    'const_constrProjSize',
+    'const_worktravelconstr',
+    'const_constrwaste',
+    'use_oeu',
+    'use_owu',
+    'use_operwaste',
+    'use_landvegconstr',
+    'useremis_vehu',
+    'useremis_train',
+    'maint_mpfu',
+    'eolife_decon',
+    'eolife_wasMan'),
+  excel_tab_names = c(
+    'Pre-Con Clearance Dem',
+    'Pre-Con LU Change Veg Loss',
+    'Pre-Con Water Use',
+    'Emb Carbon Raw Materials',
+    'Emb Carbon Transport',
+    'Const Excavation',
+    'Const Activities (hourly fuel)',
+    'Const Activities (total fuel)',
+    'Const Water Use',
+    'Const Project Size',
+    'Const Worker Travel',
+    'Const Waste',
+    'Use Operational Energy',
+    'Use Operational Water',
+    'Use Operational Waste',
+    'Use Landscaping Veg',
+    'User Emis Vehicle Use',
+    'User Emis Train Operation',
+    'Maint Plant Fuel Use',
+    'End of Life Deconstruction',
+    'End of Life Waste')
+)
+
 
 # ## rewrite temp save files
 # for (i in 1:nrow(collatedTableLoadFiles)){

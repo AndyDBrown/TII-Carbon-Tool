@@ -361,6 +361,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        Material = as.character(NA),
                        Quantity = 0.0,
                        Unit = as.character(NA),
+                       `kgCO2e per unit` = 0.0,
                        `Default Maintenance Percentage` = 0.0,
                        `Embodied tCO2e` = 0.0,
                        `Maintenance tCO2e` = 0.0,
@@ -372,6 +373,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
   DF_trans = data.table(`Transport Type` = rep("HGV - All - Average", rhot_rows), 
                         Distance = 0.0,
                         Unit = "km",
+                        `kgCO2e per unit` = 0.0,
                         `Transport tCO2e` = 0.0,
                         Comments = as.character(NA),
                         stringsAsFactors = F, check.names = FALSE)
@@ -554,7 +556,16 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        print("EMBCARBON:  Savefile version NOT up to date - please check inputs")
                        #browser()
                        tmpData <- appR_returned$data[[paste0(id,"_rmecTbl")]]
-                       if (ncol(tmpData)==9){tmpData$`Custom Maintenance` <- "N"}
+                       
+                       if ("kgCO2e per unit" %notin% names(tmpData)) {
+                         tmpData$`kgCO2e per unit` <- 0.0
+                         tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                       }
+                       
+                       if ("Custom Maintenance" %notin% names(tmpData)) {
+                         tmpData$`Custom Maintenance` <- "N"
+                       }
+                       #if (ncol(tmpData)==9){tmpData$`Custom Maintenance` <- "N"}
                        colnames(tmpData) <- colnames(DF_rmec)
                        tmpData$Comments <- as.character(tmpData$Comments)
                        tmpData$Unit <- as.character(tmpData$Unit)
@@ -624,13 +635,25 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        
                      } else {
                        print("EMBCARBON:  Savefile Version 2 - up to date")
+                       
                        #if (id == "embcarbonro1"){browser()}
+                       
                        #shiny.destroy::removeOutput("rmec_ro_Tbl")
                        output$rmec_ro_Tbl <- NULL
                        output$rmec_ro_Tbl_textheader <- NULL
                        
                        tmpData <- as.data.table(appR_returned$data[[paste0(id,"_rmecTbl")]])
-                       if (ncol(tmpData)==9){tmpData$`Custom Maintenance` <- "N"}
+                       
+                       if ("kgCO2e per unit" %notin% names(tmpData)) {
+                         tmpData$`kgCO2e per unit` <- 0.0
+                         tmpData <- tmpData %>% dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
+                       }
+                       
+                       if ("Custom Maintenance" %notin% names(tmpData)) {
+                         tmpData$`Custom Maintenance` <- "N"
+                       }
+                       
+                       #if (ncol(tmpData)==9){tmpData$`Custom Maintenance` <- "N"}
                        tmpData[is.na(`Custom Maintenance`), `Custom Maintenance` := "N"] # convert any NAs to "N"
                        colnames(tmpData) <- colnames(DF_rmec)
                        tmpData$Comments <- as.character(tmpData$Comments)
@@ -672,7 +695,8 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        #  dplyr::select(-`Category-NEW`, `Sub Category-NEW`)
                        
                        
-                       tmpData_recalc <- left_join(tmpData,dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
+                       #tmpData_recalc <- left_join(tmpData,dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
+                       tmpData_recalc <- left_join(tmpData %>% dplyr::select(-`kgCO2e per unit`), dropdown_options_temp, by = c("Category", "Sub Category", "Material", "Unit"))
                        # tmpData_recalc <- left_join(tmpData,efs_react$data$Material_Road, by = c("Category", "Sub Category", "Material", "Unit")) # need to add in a line before this to add manual EFs to dropdown options! Done see prev line
                        tmpData_recalc$`Embodied tCO2e` = tmpData_recalc$Quantity *  tmpData_recalc$`kgCO2e per unit` * kgConversion
                        tmpData_recalc$`Default Maintenance Percentage` = (projectLifetime / tmpData_recalc$`Regularity of maintenance cycle`) * tmpData_recalc$`% replaced in 1 maintenance cycle`
@@ -680,7 +704,8 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        #tmpData_recalc$`Maintenance tCO2e` = tmpData_recalc$`Default Maintenance Percentage` * tmpData_recalc$`Embodied tCO2e`
                        tmpData_recalc[`Custom Maintenance`=="N", `Maintenance tCO2e` := `Default Maintenance Percentage` * `Embodied tCO2e`]
                        # tmpData_recalc <- tmpData_recalc[-c("kgCO2e per unit", "% replaced in 1 maintenance cycle", "Regularity of maintenance cycle")]
-                       tmpData = tmpData_recalc[,1:ncol(tmpData)]
+                       tmpData = tmpData_recalc[,1:ncol(tmpData)] %>%
+                         dplyr::relocate(., `kgCO2e per unit`, .after = "Unit")
                        ### End
                        
                        
@@ -694,6 +719,15 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                      
                      
                      tmpData <- appR_returned$data[[paste0(id,"_transTbl")]]
+                     if ("kgCO2e per unit" %in% names(tmpData)) {
+                       tmpData <- tmpData %>% dplyr::select(., -`kgCO2e per unit`)
+                     }
+                     #if (id == "embcarbonro1"){browser()}
+                       tmpData <- tmpData %>%
+                         dplyr::left_join(., trans_mode_options[, c("Vehicle","kgCO2e per unit")], by = c("Transport Type" = "Vehicle")) %>%
+                         dplyr::relocate(., `kgCO2e per unit`, .after = Unit) %>%
+                         dplyr::mutate(., `Transport tCO2e` = `kgCO2e per unit` * Distance * kgConversion)
+                     
                      colnames(tmpData) <- colnames(DF_trans)
                      tmpData$Comments <- as.character(tmpData$Comments)
                      tmpData$Unit <- as.character(tmpData$Unit)
@@ -751,7 +785,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                  
                  output$rmecTbl <- DT::renderDT({
                    #browser()
-                   DT = rmecvalues$data %>% dplyr::select(-`Custom Maintenance`)
+                   DT = rmecvalues$data %>% dplyr::select(-`Custom Maintenance`, -`kgCO2e per unit`)
                    datatable(DT, #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(6,7,8), currency = "", interval = 3, mark = ",", digits = 3)
@@ -883,6 +917,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                                         input$rmec_add_col3, 
                                         input$rmec_add_col4, 
                                         input$rmec_add_col5,
+                                        "kgCO2e per unit" = 0,
                                         "Default Maintenance Percentage" = 0,
                                         "Embodied tCO2e" = 0,
                                         "Maintenance tCO2e" = 0,
@@ -905,18 +940,18 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                      default_maint_percent <- (projectdetails_values$lifeTime / regularity_maint_cycle) * perc_repl_1_maint_cycle # projectdetails_values$lifeTime
                    }
                    
-                   new_row[6] = default_maint_percent
+                   new_row[7] = default_maint_percent
                    
                    # change this for calcs
-                   ef_value <- dropdown_subset %>% select(`kgCO2e per unit`) %>% as.numeric()
+                   ef_value <- dropdown_subset %>% select(`kgCO2e per unit`) %>% as.numeric();   new_row[6] = ef_value
                    
-                   new_row[7] = new_row[4] * ef_value * kgConversion
-                   new_row[8] = new_row[7] * new_row[6] 
+                   new_row[8] = new_row[4] * ef_value * kgConversion
+                   new_row[9] = new_row[8] * new_row[7] 
                    
                    # Override default maintenance value if the following conditions are met
                    if (input$rmec_add_col_maint > 0 & input$rmec_add_col_checkmaint == TRUE){
-                     new_row[8] = input$rmec_add_col_maint
-                     new_row[10] = "Y"
+                     new_row[9] = input$rmec_add_col_maint
+                     new_row[11] = "Y"
                    }
                    
                    rmecvalues$data <- rbind(as.data.table(rmecvalues$data), as.data.table(new_row), use.names = F)
@@ -929,6 +964,8 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                    embcarbon_returned$data$Value <- c(sum_emb_tCO2$data, sum_maint_tCO2$data, sum_trans_tCO2$data, sum_embcarbon_tCO2$data)
                    
                    embcarbon_returned$details <- as.data.table(rmecvalues$data)[, c("Category","Embodied tCO2e")][, Option := as.numeric(stringr::str_sub(id, start = -1))]
+                   
+                   
                    
                    embcarbon_returned$rmecTblResave = rmecvalues$data
                    
@@ -990,14 +1027,14 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                          uiOutput(ns("rmec_mod_col5_out")),
                          br(),
                          checkboxInput(ns("rmec_mod_col_checkmaint"), label = "Use Custom Maintenance Value?", 
-                                       value = ifelse(!is.na(as.character(rmecvalues$data[input$rmecTbl_rows_selected, 10])) & 
-                                                         as.character(rmecvalues$data[input$rmecTbl_rows_selected, 10])=="Y", TRUE, FALSE)),
+                                       value = ifelse(!is.na(as.character(rmecvalues$data[input$rmecTbl_rows_selected, 11])) & 
+                                                         as.character(rmecvalues$data[input$rmecTbl_rows_selected, 11])=="Y", TRUE, FALSE)),
                          numericInput(ns("rmec_mod_col_maint"), label = "Custom Maintenance tCO2e",
-                                      value = ifelse(!is.na(as.character(rmecvalues$data[input$rmecTbl_rows_selected, 10])) & 
-                                                       as.character(rmecvalues$data[input$rmecTbl_rows_selected, 10])=="Y", rmecvalues$data[input$rmecTbl_rows_selected, 8], 0)),
+                                      value = ifelse(!is.na(as.character(rmecvalues$data[input$rmecTbl_rows_selected, 11])) & 
+                                                       as.character(rmecvalues$data[input$rmecTbl_rows_selected, 11])=="Y", rmecvalues$data[input$rmecTbl_rows_selected, 9], 0)),
                          br(),
                          textInput(ns("rmec_mod_col9"), label = "Comments",
-                                   placeholder = rmecvalues$data[input$rmecTbl_rows_selected,9]),
+                                   placeholder = rmecvalues$data[input$rmecTbl_rows_selected,10]),
                          
                          hidden(numericInput(ns("rmec_mod_rown"), value = input$rmecTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("confirm_mod"),"Confirm"),
@@ -1090,11 +1127,13 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                  
                  
                  observeEvent(input$confirm_mod, {
+                   #browser()
                    new_row = data.frame(input$rmec_mod_col1, 
                                         input$rmec_mod_col2, 
                                         input$rmec_mod_col3, 
                                         input$rmec_mod_col4, 
                                         input$rmec_mod_col5,
+                                        "kgCO2e per unit" = 0,
                                         "Default Maintenance Percentage" = 0,
                                         "Embodied tCO2e" = 0,
                                         "Maintenance tCO2e" = 0,
@@ -1116,23 +1155,23 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                      default_maint_percent <- (projectdetails_values$lifeTime / regularity_maint_cycle) * perc_repl_1_maint_cycle # projectdetails_values$lifeTime
                    }
                    
-                   new_row[6] = default_maint_percent
+                   new_row[7] = default_maint_percent
                    
                    # CO2e calcs
-                   ef_value <- dropdown_subset %>% select(`kgCO2e per unit`) %>% as.numeric()
+                   ef_value <- dropdown_subset %>% select(`kgCO2e per unit`) %>% as.numeric();   new_row[6] = ef_value
                    
-                   new_row[7] = new_row[4] * ef_value * kgConversion
-                   new_row[8] = new_row[7] * new_row[6] 
+                   new_row[8] = new_row[4] * ef_value * kgConversion
+                   new_row[9] = new_row[8] * new_row[7] 
                    
                    # Override default maintenance value if the following conditions are met
                    if (input$rmec_mod_col_maint > 0 & input$rmec_mod_col_checkmaint == TRUE){
-                     new_row[8] = input$rmec_mod_col_maint
-                     new_row[10] = "Y"
+                     new_row[9] = input$rmec_mod_col_maint
+                     new_row[11] = "Y"
                    }
                    
                    #comments
                    if(input$rmec_mod_col9 == "") {
-                     new_row[9] = rmecvalues$data[input$rmec_mod_rown, 9]
+                     new_row[10] = rmecvalues$data[input$rmec_mod_rown, 10]
                    }
                    
                    rmecvalues$data[input$rmec_mod_rown,] <- new_row
@@ -1144,6 +1183,9 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                    
                    embcarbon_returned$data$Value <- c(sum_emb_tCO2$data, sum_maint_tCO2$data, sum_trans_tCO2$data, sum_embcarbon_tCO2$data)
                    embcarbon_returned$details <- as.data.table(rmecvalues$data)[, c("Category","Embodied tCO2e")][, Option := as.numeric(stringr::str_sub(id, start = -1))]
+                   
+                   
+                   
                    embcarbon_returned$rmecTblResave = rmecvalues$data
                    
                    removeModal()
@@ -1157,7 +1199,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                  
                  
                  observeEvent(input$EmbCarb_Template_upload$name, {
-                   
+                   #browser()
                    templateIn <- readxl::read_xlsx(input$EmbCarb_Template_upload$datapath)
                    
                    if (identical(names(templateIn)[1:3], names(rmecvalues$data)[1:3])){
@@ -1195,7 +1237,9 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                        )
                      }
                      
-                     templateIn_sifted <- templateIn_sifted %>% filter(!is.na(`Quantity`))
+                     templateIn_sifted <- templateIn_sifted %>% filter(!is.na(`Quantity`)) %>%
+                       dplyr::mutate(`kgCO2e per unit` = 0.0) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = Unit)
                      
                      templateIn_data <- as.data.table(bind_rows(rmecvalues$data, templateIn_sifted))
                      templateIn_data[is.na(`Custom Maintenance`), `Custom Maintenance` := "N"] # convert any NAs to "N"
@@ -1217,13 +1261,14 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                          default_maint_percent <- (projectdetails_values$lifeTime / regularity_maint_cycle) * perc_repl_1_maint_cycle # projectdetails_values$lifeTime
                        }
                        
-                       templateIn_data[i,6] = default_maint_percent
+                       templateIn_data[i,7] = default_maint_percent
                        
                        # CO2e calcs
                        ef_value <- dropdown_subset %>% select(`kgCO2e per unit`) %>% as.numeric()
+                       templateIn_data[i,6] = ef_value
                        
-                       templateIn_data[i,7] = templateIn_data[i,4] * ef_value * kgConversion
-                       templateIn_data[i,8] = templateIn_data[i,7] * templateIn_data[i,6]
+                       templateIn_data[i,8] = templateIn_data[i,4] * ef_value * kgConversion
+                       templateIn_data[i,9] = templateIn_data[i,8] * templateIn_data[i,7]
                      }
                      
                      rmecvalues$data = templateIn_data
@@ -1254,7 +1299,7 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                  #ns <- session$ns
 
                  output$transTbl <- DT::renderDT({
-                   DT = transvalues$data
+                   DT = transvalues$data %>% dplyr::select(-`kgCO2e per unit`)
                    datatable(DT, #selection = 'single',
                              escape=F, rownames= FALSE) %>%
                      DT::formatCurrency(columns = c(4), currency = "", interval = 3, mark = ",", digits = 3)
@@ -1280,9 +1325,10 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                    new_row = data.frame(input$trans_add_col1,
                                         input$trans_add_col2,
                                         input$trans_add_col3,
-                                        "Transport tCO2e" = 0, #output$trans_add_col4_out,
+                                        "Transport.tCO2e" = 0, #output$trans_add_col4_out,
                                         input$trans_add_col5) %>%
                      dplyr::left_join(., trans_mode_options, by = c("input.trans_add_col1" = "Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .before = Transport.tCO2e) %>%
                      dplyr::mutate(Transport.tCO2e = input.trans_add_col2 * `kgCO2e per unit` * kgConversion) %>%
                      dplyr::select(., -c(Category:Reference))
                    
@@ -1340,8 +1386,8 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                                         selected = transvalues$data[input$transTbl_rows_selected,1]),
                          numericInput(ns("trans_add_col2"), label = "Distance", value = transvalues$data[input$transTbl_rows_selected,2]),
                          selectizeInput(ns("trans_add_col3"), label = "Unit", choices = c("km")),
-                         uiOutput(ns("trans_add_col4_out"), placeholder = transvalues$data[input$transTbl_rows_selected,4]),
-                         textInput(ns("trans_add_col5"), label = "Comments", placeholder = transvalues$data[input$transTbl_rows_selected,5]),
+                         uiOutput(ns("trans_add_col4_out"), placeholder = transvalues$data[input$transTbl_rows_selected,5]),
+                         textInput(ns("trans_add_col5"), label = "Comments", placeholder = transvalues$data[input$transTbl_rows_selected,6]),
                          
                          hidden(numericInput(ns("trans_mod_rown"), value = input$transTbl_rows_selected, label = "row being edited")),
                          actionButton(ns("trans_confirm_mod"),"Confirm"),
@@ -1360,9 +1406,10 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                    new_row = data.frame(input$trans_add_col1,
                                         input$trans_add_col2,
                                         input$trans_add_col3,
-                                        "Transport tCO2e" = 0, #output$trans_add_col4_out,
+                                        "Transport.tCO2e" = 0, #output$trans_add_col4_out,
                                         input$trans_add_col5) %>%
                      dplyr::left_join(., trans_mode_options, by = c("input.trans_add_col1" = "Vehicle")) %>%
+                     dplyr::relocate(., `kgCO2e per unit`, .before = Transport.tCO2e) %>%
                      dplyr::mutate(Transport.tCO2e = input.trans_add_col2 * `kgCO2e per unit`* kgConversion) %>%
                      dplyr::select(., -c(Category:Reference))
                    
@@ -1393,10 +1440,11 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                      
                      templateIn <- templateIn %>% filter(!is.na(`Distance`))
                      
-                     templateIn_data <- bind_rows(transvalues$data, templateIn) %>%
+                     templateIn_data <- bind_rows(transvalues$data %>% dplyr::select(-`kgCO2e per unit`), templateIn) %>%
                        dplyr::left_join(., trans_mode_options[, c("Vehicle","kgCO2e per unit")], by = c("Transport Type" = "Vehicle")) %>%
                        dplyr::mutate(`Transport tCO2e` = Distance * `kgCO2e per unit`* kgConversion) %>%
-                       dplyr::select(., -`kgCO2e per unit`) %>%
+                       dplyr::relocate(., `kgCO2e per unit`, .after = Unit) %>%
+                       #dplyr::select(., -`kgCO2e per unit`) %>%
                        dplyr::filter(Distance > 0)
                      
                      transvalues$data <- templateIn_data
@@ -1683,16 +1731,17 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                          default_maint_percent <- (projectdetails_values$lifeTime / regularity_maint_cycle) * perc_repl_1_maint_cycle
                        }
                        
-                       rmecvalues$data[i, 6] <- default_maint_percent
+                       rmecvalues$data[i, 7] <- default_maint_percent
                        
                        # CO2e calcs
                        ef_value <- dropdown_subset %>% select(`kgCO2e per unit`) %>% as.numeric()
+                       rmecvalues$data[i, 6] <- ef_value
                        
-                       rmecvalues$data[i, 7] = rmecvalues$data[i, 4] * ef_value * kgConversion
+                       rmecvalues$data[i, 8] = rmecvalues$data[i, 4] * ef_value * kgConversion
                        
                        # Recalculate default maintenance value if custom maintenance is set to "N", or NA (NA error catch)
-                       if (is.na(rmecvalues$data[i, 10]) | is.null(rmecvalues$data[i, 10]) | rmecvalues$data[i, 10] == "N"){
-                         rmecvalues$data[i, 8] = rmecvalues$data[i, 7] * rmecvalues$data[i, 6]
+                       if (is.na(rmecvalues$data[i, 11]) | is.null(rmecvalues$data[i, 11]) | rmecvalues$data[i, 11] == "N"){
+                         rmecvalues$data[i, 9] = rmecvalues$data[i, 8] * rmecvalues$data[i, 7]
                        }
                      }
                      
