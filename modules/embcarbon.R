@@ -1198,8 +1198,9 @@ embcarbon_server <- function(id, option_number, thetitle, theoutput, appR_return
                  
                  
                  observeEvent(input$EmbCarb_Template_upload$name, {
-                   #browser()
-                   templateIn <- readxl::read_xlsx(input$EmbCarb_Template_upload$datapath)
+                   
+                   templateIn <- readxl::read_xlsx(input$EmbCarb_Template_upload$datapath,
+                                                   col_types = c("text","text","text","text","numeric","text"))
                    
                    if (identical(names(templateIn)[1:3], names(rmecvalues$data)[1:3])){
                      
