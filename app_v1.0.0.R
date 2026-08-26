@@ -622,7 +622,7 @@ server <- function(input, output, session){
     content = function(filename){
       
       dfstoSave <- return_dfstoSave()
-      
+      browser()
       tmpdir <- tempdir()
       files <- c()
       if (appR_returned$num_road_opts_react() > 0) {
