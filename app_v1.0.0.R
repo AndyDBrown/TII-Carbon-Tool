@@ -625,6 +625,11 @@ server <- function(input, output, session){
       browser()
       tmpdir <- tempdir()
       files <- c()
+      efs_react_reference <- dplyr::bind_rows(efs_react$data) %>% dplyr::select(Material, Activity, `Energy Type`, Vehicle, Fuel, Water, `Carbon Sink`,
+                                                                                Category, `Sub Category`, 
+                                                                                `Waste Type`, `Waste Route`,
+                                                                                Column2, Column3,
+                                                                                Reference) %>% dplyr::filter(!is.na(Reference))
       if (appR_returned$num_road_opts_react() > 0) {
         for (i in 1:appR_returned$num_road_opts_react()) {
           path <- file.path(tmpdir, paste("TII-ExcelQA-RoadOpt", i, "-", format(Sys.time(), "%Y-%m-%d-%H%M"), ".xlsx", sep=""))
@@ -632,6 +637,16 @@ server <- function(input, output, session){
           dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)] # remove carbon savings tables
           names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub)) # remove "Tbl"
           names(dfs_sub) <- gsub("ro\\d", "", names(dfs_sub)) # remove the road/rail/gw option and number to shorten
+          
+          xx <- dplyr::left_join(dfs_sub$preconst_cada,efs_react_reference[, c("Activity","Category","Sub Category","Reference")],
+                                by = c("Clearance Category"="Category","Subcategory"="Sub Category","Activity"="Activity"))
+          x <- dplyr::left_join(dfs_sub$preconst_lucavl,efs_react_reference[, c("Carbon Sink", "Reference")],
+                                by = c("Vegetation Type"="Carbon Sink"))
+          
+          
+          
+          #dfs_sub$preconst_cada <- y
+          
           tmp_names <- as.data.table(names(dfs_sub))
           tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names")) # replace tab names here
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names) # replace tab names here
