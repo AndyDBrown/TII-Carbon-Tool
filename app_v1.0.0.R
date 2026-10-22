@@ -688,6 +688,27 @@ server <- function(input, output, session){
           tmp_names <- as.data.table(names(dfs_sub))
           tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names")) # replace tab names here
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names) # replace tab names here
+          
+          #browser()
+          
+          dfs_sub$`Terms of Use` <- data.table("Terms of Use" = c(
+            " ",
+            "Use of Outputs and Emission Factors:",
+            " ",
+            "This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd.",
+            "Access is restricted to individuals covered by an applicable IC+ licence.",
+            "By registering to use this tool, you as an individual are covered by a licence.",
+            "The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence.",
+            "Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided.",
+            "For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html "
+            #"For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a>"
+          ))
+          
+          dfs_sub <- dfs_sub[c(
+            "Terms of Use",
+            setdiff(names(dfs_sub), "Terms of Use")
+          )]
+          
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)
         }
