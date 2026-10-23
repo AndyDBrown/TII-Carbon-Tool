@@ -73,6 +73,10 @@ embcarbon_ui <- function(id,tabName){
                                  
                                  h4("Scheme design life (years):  ", textOutput(outputId = ns("lifeTime1"), inline = T)),
                                  br(),
+                                 
+                                 h5(HTML("Please refer to the toggled guidance above for access and distribution restrictions of IC+ data (embodied carbon emission factors from the IC+ database, 
+                                referenced as from IC+ or ICE database sources) presented in this tab.")),
+                                 
                                  # h5("Select rows to add to table:"),
                                  # splitLayout(numericInput(ns("rmec_add_n_rows"), label = NULL, value = 5, min = 1, max = 20), 
                                  #        actionButton(inputId = ns("rmec_run_add_rows"), label = "Add rows"), cellWidths = c("10%", "90%")),

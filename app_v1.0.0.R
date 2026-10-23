@@ -691,6 +691,14 @@ server <- function(input, output, session){
           
           #browser()
           
+          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] %>%
+            dplyr::left_join(., excel_export_projinfo_names, by=c("idInput" = "tbl_names")) %>% # replace tab names here
+            dplyr::select(-idInput) %>%
+            dplyr::relocate(`Project Attribute`, .before = "Value")
+          
+          dfs_sub$`Project Information` <- tmp_projinfo
+          dfs_sub <- dfs_sub[c("Project Information", setdiff(names(dfs_sub), "Project Information"))] # change position in list to front
+          
           dfs_sub$`Terms of Use` <- data.table("Terms of Use" = c(
             " ",
             "Use of Outputs and Emission Factors:",
@@ -703,11 +711,7 @@ server <- function(input, output, session){
             "For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html "
             #"For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a>"
           ))
-          
-          dfs_sub <- dfs_sub[c(
-            "Terms of Use",
-            setdiff(names(dfs_sub), "Terms of Use")
-          )]
+          dfs_sub <- dfs_sub[c("Terms of Use", setdiff(names(dfs_sub), "Terms of Use"))] # change position in list to front
           
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)

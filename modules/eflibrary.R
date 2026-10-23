@@ -7,16 +7,21 @@ eflibrary_ui <- function(id,tabName){
     box(width = 12,
         
         fluidRow(
-          column(width = 12,
+          column(width = 8,
                  h6(HTML("<br>")),
                  h3(tagList(HTML("&nbsp;"), eflibrary_icon, HTML("&nbsp;"), textOutput(ns("some_title"), inline = T))),
-                 h5(tagList(HTML("<br> </br> &nbsp;"), HTML("&nbsp;"), "View CO2 emission factors and associated information for various materials and activities")),
-                 h5(HTML("<br> </br> <b>IC+ LICENSING NOTICE:</b> This This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
-                   The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
-                   For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html."))
+                 h5(tagList(HTML("<br> </br> &nbsp;"), HTML("&nbsp;"), "View CO2 emission factors and associated information for various materials and activities"))
           ),
           column(width = 4, align = "right",
                  h3(tagList(HTML("&nbsp;"), span(img(src="TIICarbonLogo.jpg", width = 220)), HTML("&nbsp;")))
+          )
+        ),
+        
+        fluidRow(
+          column(width = 12,
+                 h5(HTML("<br> </br> <b>IC+ LICENSING NOTICE:</b> This This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
+                   The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
+                   For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html.<br><br>"))
           )
         ),
         

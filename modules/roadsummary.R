@@ -76,6 +76,17 @@ roadsummary_ui <- function(id, tabName, summary_icon){
                
                tabPanel(title = "Embodied Carbon Emissions Breakdown", value = "embcarbonbdown",
                         hr(),
+                        
+                        fluidRow(column(width = 12,
+                                        box(width = 12,
+                                            actionButton(inputId = ns("embcarbonguidbutton"), label = "Toggle Guidance Notes", style=toggle_guid_btn_style),
+                                            hidden(
+                                              div(id = ns("guid_notes"),
+                                                  p(HTML("<br> </br><b>IC+ LICENSING NOTICE:</b> This This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
+                   The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
+                   For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html."))
+                                              ))))),
+                        
                         fluidRow(
                           column(width = 10,
                                  actionButton(inputId = ns("embcarbonbutton"), label = "Show/Hide Graph", style=toggle_guid_btn_style)
@@ -85,12 +96,12 @@ roadsummary_ui <- function(id, tabName, summary_icon){
                           )
                         ),
                         #add text here
-                        fluidRow(column(width = 12,
-                                        
-                                        h5(HTML("<br> </br><b>IC+ LICENSING NOTICE:</b> This This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
-                   The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
-                   For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html."))
-                        )),
+                   #      fluidRow(column(width = 12,
+                   #                      
+                   #                      h5(HTML("<br> </br><b>IC+ LICENSING NOTICE:</b> This This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
+                   # The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
+                   # For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html."))
+                   #      )),
                         
                         fluidRow(
                           column(width = 12,
@@ -850,6 +861,11 @@ roadsummary_server <- function(id, thetitle, summary_data_react, embcarbon_detai
                  observeEvent(input$emisintensitybutton, {
                    shinyjs::toggle("emisintensitydiv")
                  })
+                 
+                 observeEvent(input$embcarbonguidbutton, {
+                   shinyjs::toggle("guid_notes")
+                 })
+                 
                }, session = getDefaultReactiveDomain()
   )
 }
