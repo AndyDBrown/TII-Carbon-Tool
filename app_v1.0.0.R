@@ -725,9 +725,80 @@ server <- function(input, output, session){
           dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
           names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
           names(dfs_sub) <- gsub("ra\\d", "", names(dfs_sub))
+          
+          # join in references and update the dfs_sub tables before exporting to Excel
+          # pre-con
+          x <- dplyr::left_join(dfs_sub$preconst_cada,efs_react_reference[, c("Activity","Category","Sub Category","Reference")],
+                                by = c("Clearance Category"="Category","Subcategory"="Sub Category","Activity"="Activity"), na_matches = "never"); dfs_sub$preconst_cada <- x
+          x <- dplyr::left_join(dfs_sub$preconst_lucavl,efs_react_reference[, c("Carbon Sink", "Reference")],
+                                by = c("Vegetation Type"="Carbon Sink"), na_matches = "never"); dfs_sub$preconst_lucavl <- x
+          x <- dplyr::left_join(dfs_sub$preconst_wudcda,efs_react_reference[, c("Water","Reference")],
+                                by = c("Water Use"="Water"), na_matches = "never"); dfs_sub$preconst_wudcda <- x
+          # embodied carbon
+          x <- dplyr::left_join(dfs_sub$embcarbon_rmec,efs_react_reference[, c("Material", "Category","Sub Category","Reference")],
+                                by = c()); dfs_sub$embcarbon_rmec <- x
+          
+          x <- dplyr::left_join(dfs_sub$embcarbon_trans,efs_react_reference[, c("Vehicle","Reference")],
+                                by = c("Transport Type"="Vehicle"), na_matches = "never"); dfs_sub$embcarbon_trans <- x
+          # construction
+          x <- dplyr::left_join(dfs_sub$const_excav,efs_react_reference[, c("Activity","Category","Sub Category","Reference")],
+                                by = c("Excavation Category"="Category","Excavation Sub Category"="Sub Category","Activity"="Activity"), na_matches = "never"); dfs_sub$const_excav <- x
+          x <- dplyr::left_join(dfs_sub$const_constr,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Energy Type"="Fuel"), na_matches = "never"); dfs_sub$const_constr <- x
+          x <- dplyr::left_join(dfs_sub$const_constrAlt,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Energy Type"="Fuel"), na_matches = "never"); dfs_sub$const_constrAlt <- x
+          x <- dplyr::left_join(dfs_sub$const_wuconstr,efs_react_reference[, c("Water","Reference")],
+                                by = c("Water Use"="Water"), na_matches = "never"); dfs_sub$const_wuconstr <- x
+          x <- dplyr::left_join(dfs_sub$const_constrProjSize,efs_react_reference[, c("Activity","Reference")],
+                                by = c("Size of Project"="Activity"), na_matches = "never"); dfs_sub$const_constrProjSize <- x
+          x <- dplyr::left_join(dfs_sub$const_worktravelconstr,efs_react_reference[, c("Vehicle","Reference")],
+                                by = c("Mode of Transport"="Vehicle"), na_matches = "never"); dfs_sub$const_worktravelconstr <- x
+          x <- dplyr::left_join(dfs_sub$const_constrwaste,efs_react_reference[, c("Waste Type","Waste Route","Reference")],
+                                by = c(), na_matches = "never"); dfs_sub$const_constrwaste <- x
+          # operation
+          x <- dplyr::left_join(dfs_sub$use_oeu,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Energy Type"="Fuel"), na_matches = "never"); dfs_sub$use_oeu <- x
+          x <- dplyr::left_join(dfs_sub$use_owu,efs_react_reference[, c("Water","Reference")],
+                                by = c("Water Use"="Water"), na_matches = "never"); dfs_sub$use_owu <- x
+          x <- dplyr::left_join(dfs_sub$use_operwaste,efs_react_reference[, c("Waste Type","Waste Route","Reference")],
+                                by = c(), na_matches = "never"); dfs_sub$use_operwaste <- x
+          x <- dplyr::left_join(dfs_sub$use_landvegconstr,efs_react_reference[, c("Carbon Sink","Reference")],
+                                by = c("Vegetation Type"="Carbon Sink"), na_matches = "never"); dfs_sub$use_landvegconstr <- x
+          # maintenance
+          x <- dplyr::left_join(dfs_sub$maint_mpfu,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Fuel Type"="Fuel"), na_matches = "never"); dfs_sub$maint_mpfu <- x
+          # end-of-life
+          x <- dplyr::left_join(dfs_sub$eolife_decon,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Fuel Type"="Fuel"), na_matches = "never"); dfs_sub$eolife_decon <- x
+          x <- dplyr::left_join(dfs_sub$eolife_wasMan,efs_react_reference[, c("Waste Type","Waste Route","Reference")],
+                                by = c("Waste Type"="Waste Type","Waste Route"="Waste Route"), na_matches = "never"); dfs_sub$eolife_wasMan <- x
+          
           tmp_names <- as.data.table(names(dfs_sub))
           tmp_names <- dplyr::left_join(tmp_names, excel_export_names_rail, by=c("V1" = "tbl_names"))
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
+          
+          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] %>%
+            dplyr::left_join(., excel_export_projinfo_names, by=c("idInput" = "tbl_names")) %>% # replace tab names here
+            dplyr::select(-idInput) %>%
+            dplyr::relocate(`Project Attribute`, .before = "Value")
+          
+          dfs_sub$`Project Information` <- tmp_projinfo
+          dfs_sub <- dfs_sub[c("Project Information", setdiff(names(dfs_sub), "Project Information"))] # change position in list to front
+          
+          dfs_sub$`Terms of Use` <- data.table("Terms of Use" = c(
+            " ",
+            "Use of Outputs and Emission Factors:",
+            " ",
+            "This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd.",
+            "Access is restricted to individuals covered by an applicable IC+ licence.",
+            "By registering to use this tool, you as an individual are covered by a licence.",
+            "The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence.",
+            "Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided.",
+            "For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html "
+            #"For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a>"
+          ))
+          dfs_sub <- dfs_sub[c("Terms of Use", setdiff(names(dfs_sub), "Terms of Use"))] # change position in list to front
+          
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)
         }
@@ -740,9 +811,80 @@ server <- function(input, output, session){
           dfs_sub <- dfs_sub[grep("csavo", names(dfs_sub), invert = TRUE)]
           names(dfs_sub) <- gsub("Tbl", "", names(dfs_sub))
           names(dfs_sub) <- gsub("gw\\d", "", names(dfs_sub))
+          
+          # join in references and update the dfs_sub tables before exporting to Excel
+          # pre-con
+          x <- dplyr::left_join(dfs_sub$preconst_cada,efs_react_reference[, c("Activity","Category","Sub Category","Reference")],
+                                by = c("Clearance Category"="Category","Subcategory"="Sub Category","Activity"="Activity"), na_matches = "never"); dfs_sub$preconst_cada <- x
+          x <- dplyr::left_join(dfs_sub$preconst_lucavl,efs_react_reference[, c("Carbon Sink", "Reference")],
+                                by = c("Vegetation Type"="Carbon Sink"), na_matches = "never"); dfs_sub$preconst_lucavl <- x
+          x <- dplyr::left_join(dfs_sub$preconst_wudcda,efs_react_reference[, c("Water","Reference")],
+                                by = c("Water Use"="Water"), na_matches = "never"); dfs_sub$preconst_wudcda <- x
+          # embodied carbon
+          x <- dplyr::left_join(dfs_sub$embcarbon_rmec,efs_react_reference[, c("Material", "Category","Sub Category","Reference")],
+                                by = c()); dfs_sub$embcarbon_rmec <- x
+          
+          x <- dplyr::left_join(dfs_sub$embcarbon_trans,efs_react_reference[, c("Vehicle","Reference")],
+                                by = c("Transport Type"="Vehicle"), na_matches = "never"); dfs_sub$embcarbon_trans <- x
+          # construction
+          x <- dplyr::left_join(dfs_sub$const_excav,efs_react_reference[, c("Activity","Category","Sub Category","Reference")],
+                                by = c("Excavation Category"="Category","Excavation Sub Category"="Sub Category","Activity"="Activity"), na_matches = "never"); dfs_sub$const_excav <- x
+          x <- dplyr::left_join(dfs_sub$const_constr,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Energy Type"="Fuel"), na_matches = "never"); dfs_sub$const_constr <- x
+          x <- dplyr::left_join(dfs_sub$const_constrAlt,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Energy Type"="Fuel"), na_matches = "never"); dfs_sub$const_constrAlt <- x
+          x <- dplyr::left_join(dfs_sub$const_wuconstr,efs_react_reference[, c("Water","Reference")],
+                                by = c("Water Use"="Water"), na_matches = "never"); dfs_sub$const_wuconstr <- x
+          x <- dplyr::left_join(dfs_sub$const_constrProjSize,efs_react_reference[, c("Activity","Reference")],
+                                by = c("Size of Project"="Activity"), na_matches = "never"); dfs_sub$const_constrProjSize <- x
+          x <- dplyr::left_join(dfs_sub$const_worktravelconstr,efs_react_reference[, c("Vehicle","Reference")],
+                                by = c("Mode of Transport"="Vehicle"), na_matches = "never"); dfs_sub$const_worktravelconstr <- x
+          x <- dplyr::left_join(dfs_sub$const_constrwaste,efs_react_reference[, c("Waste Type","Waste Route","Reference")],
+                                by = c(), na_matches = "never"); dfs_sub$const_constrwaste <- x
+          # operation
+          x <- dplyr::left_join(dfs_sub$use_oeu,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Energy Type"="Fuel"), na_matches = "never"); dfs_sub$use_oeu <- x
+          x <- dplyr::left_join(dfs_sub$use_owu,efs_react_reference[, c("Water","Reference")],
+                                by = c("Water Use"="Water"), na_matches = "never"); dfs_sub$use_owu <- x
+          x <- dplyr::left_join(dfs_sub$use_operwaste,efs_react_reference[, c("Waste Type","Waste Route","Reference")],
+                                by = c(), na_matches = "never"); dfs_sub$use_operwaste <- x
+          x <- dplyr::left_join(dfs_sub$use_landvegconstr,efs_react_reference[, c("Carbon Sink","Reference")],
+                                by = c("Vegetation Type"="Carbon Sink"), na_matches = "never"); dfs_sub$use_landvegconstr <- x
+          # maintenance
+          x <- dplyr::left_join(dfs_sub$maint_mpfu,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Fuel Type"="Fuel"), na_matches = "never"); dfs_sub$maint_mpfu <- x
+          # end-of-life
+          x <- dplyr::left_join(dfs_sub$eolife_decon,efs_react_reference[, c("Fuel","Reference")],
+                                by = c("Fuel Type"="Fuel"), na_matches = "never"); dfs_sub$eolife_decon <- x
+          x <- dplyr::left_join(dfs_sub$eolife_wasMan,efs_react_reference[, c("Waste Type","Waste Route","Reference")],
+                                by = c("Waste Type"="Waste Type","Waste Route"="Waste Route"), na_matches = "never"); dfs_sub$eolife_wasMan <- x
+          
           tmp_names <- as.data.table(names(dfs_sub))
           tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names"))
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
+          
+          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] %>%
+            dplyr::left_join(., excel_export_projinfo_names, by=c("idInput" = "tbl_names")) %>% # replace tab names here
+            dplyr::select(-idInput) %>%
+            dplyr::relocate(`Project Attribute`, .before = "Value")
+          
+          dfs_sub$`Project Information` <- tmp_projinfo
+          dfs_sub <- dfs_sub[c("Project Information", setdiff(names(dfs_sub), "Project Information"))] # change position in list to front
+          
+          dfs_sub$`Terms of Use` <- data.table("Terms of Use" = c(
+            " ",
+            "Use of Outputs and Emission Factors:",
+            " ",
+            "This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd.",
+            "Access is restricted to individuals covered by an applicable IC+ licence.",
+            "By registering to use this tool, you as an individual are covered by a licence.",
+            "The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence.",
+            "Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided.",
+            "For licensing information, visit the IC+ EULA and guidance page: https://circularecology.com/icplus-eula.html "
+            #"For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a>"
+          ))
+          dfs_sub <- dfs_sub[c("Terms of Use", setdiff(names(dfs_sub), "Terms of Use"))] # change position in list to front
+          
           writexl::write_xlsx(dfs_sub, path)
           files <- c(files, path)
         }
