@@ -68,7 +68,7 @@ const_ui <- function(id,tabName){
         )),
          tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "excav",
                 
-                tabPanel(title = tagList("Excavation Activities", icon("arrow-circle-right")), value = "excav", #  tagList("Clearance and Demolition Activities ", icon("arrow-circle-right"))   check-circle
+                tabPanel(title = tagList("Excavation Activities (A5)", icon("arrow-circle-right")), value = "excav", #  tagList("Clearance and Demolition Activities ", icon("arrow-circle-right"))   check-circle
                          fluidRow(
                            column(width = 12,
                                   h4("Excavation Activities Emissions (tCO2e):  ", textOutput(outputId = ns("sum_excav_tCO2"), inline = T)),
@@ -105,7 +105,7 @@ const_ui <- function(id,tabName){
                          )
                 ),
                 
-                tabPanel(title = tagList("Construction Activities", icon("arrow-circle-right")), value = "constract",
+                tabPanel(title = tagList("Construction Activities (A5)", icon("arrow-circle-right")), value = "constract",
                          fluidRow(#style = "border: 4px double red;",
                                   column(width = 12,
                                          h4("Construction Activities Emissions (tCO2e):  ", textOutput(outputId = ns("sum_const_tCO2"), inline = T)),
@@ -194,7 +194,7 @@ const_ui <- function(id,tabName){
                          # )
                 ),
                 
-                tabPanel(title = tagList("Water Use During Construction Activities", icon("arrow-circle-right")), value = "wuconstract",
+                tabPanel(title = tagList("Water Use During Construction Activities (A5)", icon("arrow-circle-right")), value = "wuconstract",
                          fluidRow(
                            column(width = 12,
                                   h4("Construction Water Use Emissions (tCO2e):  ", textOutput(outputId = ns("sum_cwuse_tCO2"), inline = T)),
@@ -230,7 +230,7 @@ const_ui <- function(id,tabName){
                          )
                 ),
                 
-                tabPanel(title = tagList("Construction Worker Travel To Site", icon("arrow-circle-right")), value = "worktravelconstract",
+                tabPanel(title = tagList("Construction Worker Travel To Site (A4)", icon("arrow-circle-right")), value = "worktravelconstract",
                          fluidRow(
                            column(width = 12,
                                   h4("Construction Worker Travel Emissions (tCO2e):  ", textOutput(outputId = ns("sum_wtcv_tCO2"), inline = T)),
@@ -277,7 +277,7 @@ const_ui <- function(id,tabName){
                 #          )
                 # ),
                 
-				tabPanel(title = tagList("Construction Waste", icon("arrow-circle-right")), value = "constrwaste",
+				tabPanel(title = tagList("Construction Waste (A5)", icon("arrow-circle-right")), value = "constrwaste",
                          fluidRow(
                            column(width = 12,
                                   h4("Construction Waste Emissions (tCO2e):  ", textOutput(outputId = ns("sum_cwaste_tCO2"), inline = T)),

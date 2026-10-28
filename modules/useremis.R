@@ -55,7 +55,7 @@ useremis_ui <- function(id,tabName){
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "vehicleuse",
                
                
-               tabPanel(title = tagList("Vehicle Use", icon("arrow-circle-right")), value = "vehicleuse",
+               tabPanel(title = tagList("Vehicle Use (B8)", icon("arrow-circle-right")), value = "vehicleuse",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="",#"This is Annual Emissions multiplied by Scheme Design Life",

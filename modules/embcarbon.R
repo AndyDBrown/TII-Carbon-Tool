@@ -64,7 +64,7 @@ embcarbon_ui <- function(id,tabName){
         
         # Raw materials tab -----
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "rmec",
-               tabPanel(title = tagList("Raw Materials Embodied Carbon", icon("arrow-circle-right")), value = "rmec",
+               tabPanel(title = tagList("Raw Materials Embodied Carbon (A1, A3) ", icon("arrow-circle-right")), value = "rmec",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This includes emissions from maintenance of materials over the scheme design life",
@@ -120,7 +120,7 @@ embcarbon_ui <- function(id,tabName){
                ),
                
                # Transport tab -----
-               tabPanel(title = tagList("Transport", icon("arrow-circle-right")), value = "trans",
+               tabPanel(title = tagList("Transport (A2)", icon("arrow-circle-right")), value = "trans",
                         fluidRow(
                           column(width = 12,
                                  # tags$div(title="This includes emissions from maintenance of materials over the scheme design life",

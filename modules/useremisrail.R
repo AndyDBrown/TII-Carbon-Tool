@@ -57,7 +57,7 @@ useremisrail_ui <- function(id,tabName){
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "vehicleuse",
                
                
-               tabPanel(title = tagList("Road Use", icon("arrow-circle-right")), value = "vehicleuse",
+               tabPanel(title = tagList("Road Use (B8)", icon("arrow-circle-right")), value = "vehicleuse",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="",#"This is Annual Emissions multiplied by Scheme Design Life",
@@ -97,7 +97,7 @@ useremisrail_ui <- function(id,tabName){
                         )
                ),
                
-               tabPanel(title = tagList("Train Operation", icon("arrow-circle-right")), value = "trainop",
+               tabPanel(title = tagList("Train Operation (B8)", icon("arrow-circle-right")), value = "trainop",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This is Annual Emissions multiplied by Scheme Design Life",
