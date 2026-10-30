@@ -59,7 +59,7 @@ use_ui <- function(id,tabName){
         
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "oeu",
                
-               tabPanel(title = tagList("Operational Energy Use", icon("arrow-circle-right")), value = "oeu", #  tagList("Clearance and Demolition Activities ", icon("arrow-circle-right"))   check-circle
+               tabPanel(title = tagList("Operational Energy Use (B6)", icon("arrow-circle-right")), value = "oeu", #  tagList("Clearance and Demolition Activities ", icon("arrow-circle-right"))   check-circle
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This is Annual Emissions multiplied by Scheme Design Life",
@@ -99,7 +99,7 @@ use_ui <- function(id,tabName){
                         )
                ),
                
-               tabPanel(title = tagList("Operational Water Use", icon("arrow-circle-right")), value = "owu",
+               tabPanel(title = tagList("Operational Water Use (B7)", icon("arrow-circle-right")), value = "owu",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This is Annual Emissions multiplied by Scheme Design Life",
@@ -138,7 +138,7 @@ use_ui <- function(id,tabName){
                         )
                ),
                
-               tabPanel(title = tagList("Operational Waste", icon("arrow-circle-right")), value = "owaste",
+               tabPanel(title = tagList("Operational Waste (B1)", icon("arrow-circle-right")), value = "owaste",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This is Annual Emissions multiplied by Scheme Design Life",
@@ -204,7 +204,7 @@ use_ui <- function(id,tabName){
                #          )
                # ),
                
-               tabPanel(title = tagList("Landscaping and Vegetation", icon("arrow-circle-right")), value = "landvegconstract",
+               tabPanel(title = tagList("Landscaping and Vegetation (A5)", icon("arrow-circle-right")), value = "landvegconstract",
                         fluidRow(
                           column(width = 12,
                                  h4("Landscaping and Vegetation Emissions (tCO2e):  ", textOutput(outputId = ns("sum_landv_tCO2"), inline = T)),

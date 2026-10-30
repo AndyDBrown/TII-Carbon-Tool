@@ -1129,6 +1129,34 @@ excel_export_names_rail <- data.table(
 )
 
 
+excel_export_projinfo_names <- data.table(
+  tbl_names = c("projRef",
+                "nameUser",
+                "nameCompany",
+                "namecontractors",
+                "nameProj",
+                "projValue",
+                "projPhase",
+                "lifeTime",
+                "projDesc",
+                "dateProj",
+                "dateStart",
+                "dateEnd"),
+  `Project Attribute` = c('TII Project Reference',
+                 'User Name',
+                 'Company Name',
+                 'Contractors',
+                 'Project Name',
+                 'Project Value',
+                 'Project Phase',
+                 'Project Design Life',
+                 'Project Description',
+                 'Project Data Input Date',
+                 'Construction Start Date',
+                 'Construction End Date')
+)
+
+
 # ## rewrite temp save files
 # for (i in 1:nrow(collatedTableLoadFiles)){
 #   file.remove(paste0("Temp/",collatedTableLoadFiles[i,1],".csv"))

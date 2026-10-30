@@ -17,6 +17,14 @@ eflibrary_ui <- function(id,tabName){
           )
         ),
         
+        fluidRow(
+          column(width = 12,
+                 h5(HTML("<br> </br> <b>IC+ LICENSING NOTICE:</b> This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
+                   The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
+                   For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a><br><br>"))
+          )
+        ),
+        
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "material_road",
                
                tabPanel(title = "Material (Road)", value = "material_road",

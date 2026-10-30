@@ -55,7 +55,7 @@ maint_ui <- function(id,tabName){
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "maintfuel",
                
                
-               tabPanel(title = tagList("Maintenance Plant Fuel Use", icon("arrow-circle-right")), value = "maintfuel",
+               tabPanel(title = tagList("Maintenance Plant Fuel Use (B2-B5)", icon("arrow-circle-right")), value = "maintfuel",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This is Annual Emissions multiplied by Scheme Design Life",

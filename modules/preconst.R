@@ -49,7 +49,7 @@ preconst_ui <- function(id, tabName){
               )),
               
               tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "cada",
-                     tabPanel(title = tagList("Clearance and Demolition Activities ", icon("arrow-circle-right")), value = "cada",
+                     tabPanel(title = tagList("Clearance and Demolition Activities (A5) ", icon("arrow-circle-right")), value = "cada",
                               fluidRow(
                                 column(width = 12,
                                        h4("Clearance and Demolition Activities Emissions (tCO2e):   ", textOutput(outputId = ns("sum_cada_tCO2"), inline = T)),
@@ -88,7 +88,7 @@ preconst_ui <- function(id, tabName){
                               )
                      ),
                      
-                     tabPanel(title = tagList("Land Use Change and Vegetation Loss ", icon("arrow-circle-right")), value = "lucavl",
+                     tabPanel(title = tagList("Land Use Change and Vegetation Loss (A5) ", icon("arrow-circle-right")), value = "lucavl",
                               fluidRow(
                                 column(width = 12,
                                        h4("Land Use Change and Vegetation Loss Emissions (tCO2e):   ", textOutput(outputId = ns("sum_lucavl_tCO2"), inline = T)),
@@ -126,7 +126,7 @@ preconst_ui <- function(id, tabName){
                               )
                      ),
                      
-                     tabPanel(title = tagList("Water Use During Clearance and Demolition Activities ", icon("arrow-circle-right")), value = "wudcda",
+                     tabPanel(title = tagList("Water Use During Clearance and Demolition Activities (A5) ", icon("arrow-circle-right")), value = "wudcda",
                               fluidRow(
                                 column(width = 12,
                                        h4("Water Use Emissions (tCO2e):   ", textOutput(outputId = ns("sum_wudcda_tCO2"), inline = T)),

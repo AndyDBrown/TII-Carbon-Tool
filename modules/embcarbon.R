@@ -55,13 +55,16 @@ embcarbon_ui <- function(id,tabName){
                    and cannot be changed. Note that the Default Maintenance Percentage may be greater than 100% where all materials are completely replaced more than once during the project lifetime.<br><br>
                    For transport of material, the mode of transport and estimated kilometres travelled for each material is required. Two modes of transport can be entered per material.
                    Emissions are calculated automatically as data is entered.<br>
-                   Carbon savings opportunities (both proposed and implemented) should be entered in the tables provided for each material detailed, as applicable."))
+                   Carbon savings opportunities (both proposed and implemented) should be entered in the tables provided for each material detailed, as applicable. <br>
+                   <br><b>IC+ LICENSING NOTICE:</b> This This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. 
+                   The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided. 
+                   For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a>"))
                             ))))),
         #hr(),
         
         # Raw materials tab -----
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "rmec",
-               tabPanel(title = tagList("Raw Materials Embodied Carbon", icon("arrow-circle-right")), value = "rmec",
+               tabPanel(title = tagList("Raw Materials Embodied Carbon (A1, A3) ", icon("arrow-circle-right")), value = "rmec",
                         fluidRow(
                           column(width = 12,
                                  tags$div(title="This includes emissions from maintenance of materials over the scheme design life",
@@ -70,6 +73,10 @@ embcarbon_ui <- function(id,tabName){
                                  
                                  h4("Scheme design life (years):  ", textOutput(outputId = ns("lifeTime1"), inline = T)),
                                  br(),
+                                 
+                                 h5(HTML("Please refer to the toggled guidance above for access and distribution restrictions of IC+ data (embodied carbon emission factors from the IC+ database, 
+                                referenced as from IC+ or ICE database sources) presented in this tab.")),
+                                 
                                  # h5("Select rows to add to table:"),
                                  # splitLayout(numericInput(ns("rmec_add_n_rows"), label = NULL, value = 5, min = 1, max = 20), 
                                  #        actionButton(inputId = ns("rmec_run_add_rows"), label = "Add rows"), cellWidths = c("10%", "90%")),
@@ -113,7 +120,7 @@ embcarbon_ui <- function(id,tabName){
                ),
                
                # Transport tab -----
-               tabPanel(title = tagList("Transport", icon("arrow-circle-right")), value = "trans",
+               tabPanel(title = tagList("Transport (A2)", icon("arrow-circle-right")), value = "trans",
                         fluidRow(
                           column(width = 12,
                                  # tags$div(title="This includes emissions from maintenance of materials over the scheme design life",
@@ -214,6 +221,10 @@ embcarbon_ui <- function(id,tabName){
                                          <li>Adopt pre-cast or modular construction (e.g. twin arch tunnel linings)</li></ul>"))
                                  )
                           ),
+                        
+                        h5(HTML("Please refer to the toggled guidance above for access and distribution restrictions of IC+ data (embodied carbon emission factors from the IC+ database, 
+                                referenced as from IC+ or ICE database sources) presented in this tab.")),
+                        
                         fluidRow(
                           column(width = 4,
                                  # tags$div(title="This includes emissions from maintenance of materials over the scheme design life",

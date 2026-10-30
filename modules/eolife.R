@@ -55,7 +55,7 @@ eolife_ui <- function(id,tabName){
         ),
         
         tabBox(width = 12, side = "left", id = ns("tabbox"), selected = "deconAct",
-               tabPanel(title = tagList("Deconstruction Activities", icon("arrow-circle-right")), value = "deconAct", #  tagList("Clearance and Demolition Activities ", icon("arrow-circle-right"))   check-circle
+               tabPanel(title = tagList("Deconstruction Activities (C1)", icon("arrow-circle-right")), value = "deconAct", #  tagList("Clearance and Demolition Activities ", icon("arrow-circle-right"))   check-circle
                         fluidRow(
                           column(width = 12,
                                  h4("Deconstruction Activities Emissions (tCO2e):  ", textOutput(outputId = ns("sum_act_tCO2"), inline = T)), HTML("<br> </br>"),
@@ -91,7 +91,7 @@ eolife_ui <- function(id,tabName){
                           )
                         )
                ),
-               tabPanel(title = tagList("Decommissioning Waste", icon("arrow-circle-right")), value = "wasMan",
+               tabPanel(title = tagList("Decommissioning Waste (C2-C4)", icon("arrow-circle-right")), value = "wasMan",
                         fluidRow(
                           column(width = 12,
                                  h4("Decommissioning Waste Emissions (tCO2e):  ", textOutput(outputId = ns("sum_was_trans_tCO2"), inline = T)), HTML("<br> </br>"),
@@ -360,7 +360,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    sum_act_tCO2$data = sum(na.omit(tmpData$`Activity tCO2e`))
                    
                    
-                   sum_eolife_tCO2$data = sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_eolife_tCO2$data = sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value = c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    
@@ -425,7 +425,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  observeEvent(input$decon_add_row_go, {
-                   #browser()
+                   
                    new_row = data.frame(input$decon_add_col0,
                                         input$decon_add_col1,
                                         input$decon_add_col2,
@@ -443,8 +443,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    deconvalues$data <- data.table(rbind(deconvalues$data, new_row, use.names = F))
                    
-                   sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`)
-                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`, na.rm = T)
+                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    eolife_returned$deconTblResave = deconvalues$data
@@ -487,8 +487,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    deconvalues$data=deconvalues$data[-input$deconTbl_rows_selected,]
                    
-                   sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`)
-                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`, na.rm = T)
+                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    eolife_returned$deconTblResave = deconvalues$data
@@ -536,7 +536,7 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                  })
                  
                  observeEvent(input$decon_confirm_mod, {
-                   #browser()
+                   
                    new_row = data.frame(input$decon_mod_col0,
                                         input$decon_mod_col1,
                                         input$decon_mod_col2,
@@ -554,8 +554,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    deconvalues$data[input$decon_mod_rown,] <- new_row
                    
-                   sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`)
-                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`, na.rm = T)
+                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    eolife_returned$deconTblResave = deconvalues$data
@@ -592,8 +592,8 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                      
                      deconvalues$data <- templateIn_data
                      
-                     sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`)
-                     sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                     sum_act_tCO2$data <- sum(deconvalues$data$`Activity tCO2e`, na.rm = T)
+                     sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                      
                      eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                      eolife_returned$deconTblResave = deconvalues$data
@@ -659,12 +659,12 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    wasvalues$data <- data.table(rbind(wasvalues$data, new_row, use.names = F))
                    
-                   sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`)
-                   sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`)
+                   sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`, na.rm = T)
+                   sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`, na.rm = T)
                    
-                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
-                   sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    eolife_returned$wasManTblResave = wasvalues$data
@@ -731,12 +731,12 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    wasvalues$data=wasvalues$data[-input$wasManTbl_rows_selected,]
                    
-                   sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`)
-                   sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`)
+                   sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`, na.rm = T)
+                   sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`, na.rm = T)
                    
-                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
-                   sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    eolife_returned$wasManTblResave = wasvalues$data
@@ -836,12 +836,12 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                    
                    wasvalues$data[input$wasMan_mod_rown,] <- new_row
 
-                   sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`)
-                   sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`)
+                   sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`, na.rm = T)
+                   sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`, na.rm = T)
                    
-                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
-                   sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data)
+                   sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                    
                    eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                    eolife_returned$wasManTblResave = wasvalues$data
@@ -888,12 +888,12 @@ eolife_server <- function(id, option_number, thetitle, theoutput, appR_returned)
                      
                      wasvalues$data <- templateIn_data
                      
-                     sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`)
-                     sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`)
+                     sum_was_tCO2$data <- sum(wasvalues$data$`Waste Processing Carbon tCO2e`, na.rm = T)
+                     sum_trans_tCO2$data <- sum(wasvalues$data$`Transport tCO2e`, na.rm = T)
                      
-                     sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data)
+                     sum_eolife_tCO2$data <- sum(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                      
-                     sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data)
+                     sum_was_trans_tCO2$data <- sum(sum_was_tCO2$data, sum_trans_tCO2$data, na.rm = T)
                      
                      eolife_returned$data$Value <- c(sum_act_tCO2$data, sum_was_tCO2$data, sum_trans_tCO2$data, sum_eolife_tCO2$data)
                      eolife_returned$wasManTblResave = wasvalues$data

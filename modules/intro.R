@@ -26,8 +26,14 @@ intro_ui <- function(id,tabName){
         h4(HTML("It is acknowledged that, dependent upon the stage and maturity of the project, data availability may be limited at the time of the tool's use.
                 However, users are encouraged to complete each stage of the tool with as much information as possible, noting any assumptions or limitations
                 in the 'Comments/Notes/Assumptions' of the data input tables.")),
-        h4(HTML("The sidebar menu can be used to navigate through the tool. Further guidance on use of the tool can be found on each data input page by clicking the 'Toggle Guidance Notes' button.")),
-        h6(HTML(paste("Version", ToolVersion))), tagList(h6(HTML("<br/>For technical issues please contact "), mailto))
+        h4(HTML("The sidebar menu can be used to navigate through the tool. Further guidance on use of the tool can be found on each data input page by clicking the 'Toggle Guidance Notes' button.<br/><br/>")),
+        h4(strong(HTML("Use of Outputs and Emission Factors"))),
+        h4(HTML("This tool contains data licensed from the IC+ Database, owned and maintained by Circular Ecology Ltd. Access is restricted to individuals covered by an applicable IC+ licence. By registering to use this tool, you as an individual are covered by a licence.")),
+        h4(HTML("The IC+ Data and emission factors contained in this tool or its outputs must not be copied, extracted, reused, published, disclosed, or distributed to any person who is not covered by an appropriate licence. Receipt of outputs from this tool does not grant any independent right to use IC+ Data outside the purpose for which it was provided.")),
+        h4(HTML("For licensing information, visit the IC+ EULA and guidance page: <a href=https://circularecology.com/icplus-eula.html target='_blank'>https://circularecology.com/icplus-eula.html</a>.")),
+        h6(HTML(paste("Version", ToolVersion))),
+        
+        tagList(h6(HTML("<br/>For technical issues please contact "), mailto))
     )
   )
 }
