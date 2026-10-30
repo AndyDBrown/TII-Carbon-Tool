@@ -691,7 +691,11 @@ server <- function(input, output, session){
           
           #browser()
           
-          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] %>%
+          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] 
+          tmp_projinfo[idInput == "dateProj" | idInput == "dateStart" | idInput == "dateEnd", 
+                       Value := as.character(format(as.Date(as.numeric(Value), origin = as.Date("1970-01-01")), format = "%d-%b-%Y"))]
+          
+          tmp_projinfo <- tmp_projinfo %>%
             dplyr::left_join(., excel_export_projinfo_names, by=c("idInput" = "tbl_names")) %>% # replace tab names here
             dplyr::select(-idInput) %>%
             dplyr::relocate(`Project Attribute`, .before = "Value")
@@ -777,7 +781,11 @@ server <- function(input, output, session){
           tmp_names <- dplyr::left_join(tmp_names, excel_export_names_rail, by=c("V1" = "tbl_names"))
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
           
-          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] %>%
+          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] 
+          tmp_projinfo[idInput == "dateProj" | idInput == "dateStart" | idInput == "dateEnd", 
+                       Value := as.character(format(as.Date(as.numeric(Value), origin = as.Date("1970-01-01")), format = "%d-%b-%Y"))]
+          
+          tmp_projinfo <- tmp_projinfo %>%
             dplyr::left_join(., excel_export_projinfo_names, by=c("idInput" = "tbl_names")) %>% # replace tab names here
             dplyr::select(-idInput) %>%
             dplyr::relocate(`Project Attribute`, .before = "Value")
@@ -863,7 +871,11 @@ server <- function(input, output, session){
           tmp_names <- dplyr::left_join(tmp_names, excel_export_names, by=c("V1" = "tbl_names"))
           names(dfs_sub) <- as.character(tmp_names$excel_tab_names)
           
-          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] %>%
+          tmp_projinfo <- as.data.table(appR_returned$data$inputs_data_frame)[Module=="Proj1", c(3,4)] 
+          tmp_projinfo[idInput == "dateProj" | idInput == "dateStart" | idInput == "dateEnd", 
+                       Value := as.character(format(as.Date(as.numeric(Value), origin = as.Date("1970-01-01")), format = "%d-%b-%Y"))]
+          
+          tmp_projinfo <- tmp_projinfo %>%
             dplyr::left_join(., excel_export_projinfo_names, by=c("idInput" = "tbl_names")) %>% # replace tab names here
             dplyr::select(-idInput) %>%
             dplyr::relocate(`Project Attribute`, .before = "Value")
