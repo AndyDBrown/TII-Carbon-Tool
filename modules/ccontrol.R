@@ -68,8 +68,8 @@ Change13 <- "Update of EF library to include Ireland-specific pavement/concrete 
 
 ToolVersion14 <- "Version 1.0.1"
 ReleaseDate14 <- "November 2026"
-Issue14 <- "Additional functionality added to export EF references in Excel workbook, and other minor updates."
-Change14 <- "Additional functionality added to export EF references in Excel workbook, and other minor updates."
+Issue14 <- "Minor update to enable Excel export of EF references."
+Change14 <- "Additional functionality added to export EF references in Excel workbook, addition of IC+ licencing text and other minor updates to UI."
 
 
 changes <- tibble("Tool Version" = c(ToolVersion14, ToolVersion13, ToolVersion12, ToolVersion11, ToolVersion10, ToolVersion9, ToolVersion8, ToolVersion7, ToolVersion6, ToolVersion5, ToolVersion4, ToolVersion3, ToolVersion2, ToolVersion1),
