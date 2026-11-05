@@ -66,11 +66,16 @@ ReleaseDate13 <- "July 2026"
 Issue13 <- "Major update of EF library and additional Excel QA spreadsheet export functionality."
 Change13 <- "Update of EF library to include Ireland-specific pavement/concrete EFs, GGBS and energy-related factors, additional Excel QA spreadsheet export functionality."
 
+ToolVersion14 <- "Version 1.0.1"
+ReleaseDate14 <- "November 2026"
+Issue14 <- "Minor update to enable Excel export of EF references."
+Change14 <- "Additional functionality added to export EF references in Excel workbook, addition of IC+ licencing text and other minor updates to UI."
 
-changes <- tibble("Tool Version" = c(ToolVersion13, ToolVersion12, ToolVersion11, ToolVersion10, ToolVersion9, ToolVersion8, ToolVersion7, ToolVersion6, ToolVersion5, ToolVersion4, ToolVersion3, ToolVersion2, ToolVersion1),
-                  "Release Date" = c(ReleaseDate13, ReleaseDate12, ReleaseDate11, ReleaseDate10, ReleaseDate9, ReleaseDate8, ReleaseDate7, ReleaseDate6, ReleaseDate5, ReleaseDate4, ReleaseDate3, ReleaseDate2, ReleaseDate1),
-                  Issue = c(Issue13, Issue12, Issue11, Issue10, Issue9, Issue8, Issue7, Issue6, Issue5, Issue4, Issue3, Issue2, Issue1),
-                  `Description of changes` = c(Change13, Change12, Change11, Change10, Change9, Change8, Change7, Change6, Change5, Change4, Change3, Change2, Change1))
+
+changes <- tibble("Tool Version" = c(ToolVersion14, ToolVersion13, ToolVersion12, ToolVersion11, ToolVersion10, ToolVersion9, ToolVersion8, ToolVersion7, ToolVersion6, ToolVersion5, ToolVersion4, ToolVersion3, ToolVersion2, ToolVersion1),
+                  "Release Date" = c(ReleaseDate14, ReleaseDate13, ReleaseDate12, ReleaseDate11, ReleaseDate10, ReleaseDate9, ReleaseDate8, ReleaseDate7, ReleaseDate6, ReleaseDate5, ReleaseDate4, ReleaseDate3, ReleaseDate2, ReleaseDate1),
+                  Issue = c(Issue14, Issue13, Issue12, Issue11, Issue10, Issue9, Issue8, Issue7, Issue6, Issue5, Issue4, Issue3, Issue2, Issue1),
+                  `Description of changes` = c(Change14, Change13, Change12, Change11, Change10, Change9, Change8, Change7, Change6, Change5, Change4, Change3, Change2, Change1))
 
 
 ccontrol_ui <- function(id,tabName){
